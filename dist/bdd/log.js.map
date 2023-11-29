@@ -1,1 +1,0 @@
-{"version":3,"file":"log.js","sourceRoot":"","sources":["../../src/bdd/log.ts"],"names":[],"mappings":"AAAA,IAAM,KAAK,GAAG,OAAO,CAAC,QAAQ,CAAC,CAAC;AAEhC,MAAM,CAAC,OAAO,GAAG,KAAK,CAAC,gBAAgB,CAAC;IACtC,IAAI,EAAE,WAAW;IACjB,IAAI,EAAE,MAAM;IACZ,IAAI,EAAE,IAAI;IACV,QAAQ,EAAE,YAAY;CACvB,CAAC,CAAC"}

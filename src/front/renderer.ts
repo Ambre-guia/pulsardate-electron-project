@@ -5,7 +5,7 @@
 // Use preload.js to selectively enable features
 // needed in the renderer process.
 
-import { showEvents, showCalendar } from "./utils/utils";
+import { showEvents, showCalendar } from "./utils/utils.js";
 
 (async () => {
   try {
@@ -18,7 +18,7 @@ import { showEvents, showCalendar } from "./utils/utils";
 
     if (calendarContainer) {
       // Call the showCalendar function to display the calendar
-      showCalendar(events, calendarContainer);
+      showCalendar(calendarContainer);
     }
   } catch (err) {
     console.error(err);

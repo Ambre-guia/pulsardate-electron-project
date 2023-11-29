@@ -31,7 +31,7 @@ contextBridge.exposeInMainWorld("electron", {
       throw error;
     }
   },
-  getFirstDayOfMonth: async (month, year) => {
+  getFirstDayOfMonth: async (month: number, year: number) => {
     try {
       return await ipcRenderer.invoke("get-first-day-of-month", month, year);
     } catch (error) {
@@ -39,7 +39,7 @@ contextBridge.exposeInMainWorld("electron", {
       throw error;
     }
   },
-  getLastDayOfMonth: async (month, year) => {
+  getLastDayOfMonth: async (month: number, year: number) => {
     try {
       return await ipcRenderer.invoke("get-last-day-of-month", month, year);
     } catch (error) {

@@ -4,10 +4,12 @@
   "description": "A Electron calendar",
   "main": "./dist/main.js",
   "scripts": {
-    "start": "electron .",
-    "build": "tsc"
+    "build": "tsc --project ./tsconfig_back.json && tsc --project ./tsconfig_front.json",
+    "watch": "tsc -w",
+    "lint": "eslint -c .eslintrc --ext .ts ./src",
+    "start": "npm run build && electron ./dist/back/main.js"
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/Ambre-guia/pulsardate-electron-project.git",
   "keywords": [
     "Electron",
     "quick",
