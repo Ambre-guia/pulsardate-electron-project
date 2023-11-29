@@ -1,0 +1,28 @@
+{
+  "name": "pulsardate-mandfred-ambre",
+  "version": "1.0.0",
+  "description": "A Electron calendar",
+  "main": "./dist/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "tsc"
+  },
+  "repository": "https://github.com/electron/electron-quick-start",
+  "keywords": [
+    "Electron",
+    "quick",
+    "start",
+    "tutorial",
+    "demo"
+  ],
+  "author": "GitHub",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^27.1.2"
+  },
+  "dependencies": {
+    "g": "^2.0.1",
+    "mysql2": "^3.6.5",
+    "typescript": "^5.3.2"
+  }
+}
