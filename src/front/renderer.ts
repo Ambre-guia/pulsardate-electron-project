@@ -5,20 +5,25 @@
 // Use preload.js to selectively enable features
 // needed in the renderer process.
 
-import { showEvents, showCalendar } from "./utils/utils.js";
+import { /* showEvents, */ showCalendar } from "./utils/utils.js";
 
 (async () => {
   try {
-    // Example of fetching events
-    const events = await window.electron.getEvents();
-    console.log(events);
-
     // Assuming you have a DOM element with the id 'calendarContainer' to display the calendar
     const calendarContainer = document.getElementById("tableCalendar");
 
     if (calendarContainer) {
-      // Call the showCalendar function to display the calendar
-      showCalendar(calendarContainer);
+      // Example of fetching events
+      const events = await window.electron.getEvents();
+      console.log(events);
+
+      // Get the current month and year
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+
+      // Call the showCalendar function with the current month and year
+      await showCalendar(calendarContainer, currentMonth, currentYear);
     }
   } catch (err) {
     console.error(err);
