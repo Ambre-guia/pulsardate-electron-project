@@ -5,7 +5,6 @@ export async function showCalendar(container, targetMonth, targetYear) {
         // Obtient le premier et le dernier jour du mois cible
         const firstDayOfMonth = await window.electron.getFirstDayOfMonth(targetMonth, targetYear);
         const lastDayOfMonth = await window.electron.getLastDayOfMonth(targetMonth, targetYear);
-        console.log(firstDayOfMonth, "ici");
         // Crée une table pour le calendrier
         const calendarTable = document.createElement("table");
         // Crée la ligne d'en-tête avec les noms des jours
@@ -20,8 +19,11 @@ export async function showCalendar(container, targetMonth, targetYear) {
         const daysInMonth = new Date(targetYear, targetMonth, 0).getDate();
         // Calcule le jour de la semaine pour le premier jour du mois
         const startDayOfWeek = new Date(targetYear, targetMonth, 1).getDay();
+        // Obtient le jour actuel
+        const currentDate = new Date();
+        const currentDay = currentDate.getDate();
         // Crée des lignes et des cellules pour chaque jour du mois
-        let currentDay = 1;
+        let dayIndex = 1;
         for (let i = 0; i < 6; i++) {
             const calendarRow = document.createElement("tr");
             let rowIsEmpty = true; // Variable pour suivre si la ligne est vide
@@ -32,10 +34,16 @@ export async function showCalendar(container, targetMonth, targetYear) {
                     // Ajoute des cellules vides pour les jours avant le début du mois
                     calendarCell.textContent = "";
                 }
-                else if (currentDay <= daysInMonth) {
+                else if (dayIndex <= daysInMonth) {
                     // Ajoute les jours du mois
-                    calendarCell.textContent = `${currentDay}`;
-                    currentDay++;
+                    calendarCell.textContent = `${dayIndex}`;
+                    // Ajoute la classe "actualDay" si c'est le jour actuel
+                    if (dayIndex === currentDay &&
+                        targetMonth === currentDate.getMonth() &&
+                        targetYear === currentDate.getFullYear()) {
+                        calendarCell.classList.add("actualDay");
+                    }
+                    dayIndex++;
                     rowIsEmpty = false; // La ligne n'est pas vide
                 }
                 calendarRow.appendChild(calendarCell);

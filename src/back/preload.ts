@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld("electron", {
       throw error;
     }
   },
+
   getCurrentMonth: async () => {
     try {
       return await ipcRenderer.invoke("get-current-month");
@@ -23,6 +24,7 @@ contextBridge.exposeInMainWorld("electron", {
       throw error;
     }
   },
+
   getCurrentYear: async () => {
     try {
       return await ipcRenderer.invoke("get-current-year");
@@ -31,6 +33,7 @@ contextBridge.exposeInMainWorld("electron", {
       throw error;
     }
   },
+
   getFirstDayOfMonth: async (month: number, year: number) => {
     try {
       return await ipcRenderer.invoke("get-first-day-of-month", month, year);
@@ -39,11 +42,48 @@ contextBridge.exposeInMainWorld("electron", {
       throw error;
     }
   },
+
   getLastDayOfMonth: async (month: number, year: number) => {
     try {
       return await ipcRenderer.invoke("get-last-day-of-month", month, year);
     } catch (error) {
       console.error("Error invoking get-last-day-of-month:", error);
+      throw error;
+    }
+  },
+
+  createEvent: async (event: IEvent) => {
+    try {
+      return await ipcRenderer.invoke("create-event", event);
+    } catch (error) {
+      console.error("Error invoking create-event:", error);
+      throw error;
+    }
+  },
+
+  getEventById: async (eventId: number) => {
+    try {
+      return await ipcRenderer.invoke("get-event-by-id", eventId);
+    } catch (error) {
+      console.error("Error invoking get-event-by-id:", error);
+      throw error;
+    }
+  },
+
+  updateEvent: async (eventId: number, updatedEvent: IEvent) => {
+    try {
+      return await ipcRenderer.invoke("update-event", eventId, updatedEvent);
+    } catch (error) {
+      console.error("Error invoking update-event:", error);
+      throw error;
+    }
+  },
+
+  deleteEvent: async (eventId: number) => {
+    try {
+      return await ipcRenderer.invoke("delete-event", eventId);
+    } catch (error) {
+      console.error("Error invoking delete-event:", error);
       throw error;
     }
   },

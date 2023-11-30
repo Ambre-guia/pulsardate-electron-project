@@ -1,6 +1,12 @@
 import { app, ipcMain, BrowserWindow } from "electron";
 import * as path from "path";
-import { getAll } from "./bdd/event.js";
+import {
+  getAll,
+  createEvent,
+  getEventById,
+  updateEvent,
+  deleteEvent,
+} from "./bdd/event.js";
 import {
   getCurrentMonth,
   getCurrentYear,
@@ -8,13 +14,61 @@ import {
   getLastDayOfMonth,
 } from "./inc/date.js";
 
-//Zone de handle
+// Handle to get all events
 ipcMain.handle("get-events", async (event) => await getAll());
+
+// Handle to create a new event
+ipcMain.handle("create-event", async (event, newEvent) => {
+  try {
+    return await createEvent(newEvent);
+  } catch (error) {
+    console.error("Error creating event:", error);
+    throw error;
+  }
+});
+
+// Handle to get an event by ID
+ipcMain.handle("get-event-by-id", async (event, eventId) => {
+  try {
+    return await getEventById(eventId);
+  } catch (error) {
+    console.error("Error getting event by ID:", error);
+    throw error;
+  }
+});
+
+// Handle to update an existing event
+ipcMain.handle("update-event", async (event, eventId, updatedEvent) => {
+  try {
+    return await updateEvent(eventId, updatedEvent);
+  } catch (error) {
+    console.error("Error updating event:", error);
+    throw error;
+  }
+});
+
+// Handle to delete an event by ID
+ipcMain.handle("delete-event", async (event, eventId) => {
+  try {
+    return await deleteEvent(eventId);
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    throw error;
+  }
+});
+
+// Handle to get the current month
 ipcMain.handle("get-current-month", async (event) => getCurrentMonth());
+
+// Handle to get the current year
 ipcMain.handle("get-current-year", async (event) => getCurrentYear());
+
+// Handle to get the first day of the month
 ipcMain.handle("get-first-day-of-month", async (event, month, year) =>
   getFirstDayOfMonth(month, year)
 );
+
+// Handle to get the last day of the month
 ipcMain.handle("get-last-day-of-month", async (event, month, year) =>
   getLastDayOfMonth(month, year)
 );
