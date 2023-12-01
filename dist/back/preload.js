@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // Preload (Isolated World)
 const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("electron", {
-    getEvents: async () => {
+    getAll: async () => {
         try {
             return await ipcRenderer.invoke("get-events");
         }

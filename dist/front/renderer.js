@@ -19,7 +19,7 @@ import { showCreateEvent, showCalendar } from "./utils/utils.js";
             await showCalendar(calendarContainer, currentMonth, currentYear);
         }
         if (eventContainer) {
-            const events = await window.electron.getEvents();
+            const events = await window.electron.getAll();
             console.log(events);
             await showCreateEvent();
         }

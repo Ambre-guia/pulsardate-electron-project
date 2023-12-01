@@ -7,7 +7,7 @@ import { IEvent } from "../interfaces/event";
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electron", {
-  getEvents: async () => {
+  getAll: async () => {
     try {
       return await ipcRenderer.invoke("get-events");
     } catch (error) {

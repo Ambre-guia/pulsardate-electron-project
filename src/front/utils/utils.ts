@@ -53,6 +53,10 @@ export async function showCalendar(
       targetYear
     );
 
+    // Obtient tout les événements
+    const events = await window.electron.getAll();
+
+
     // Crée une table pour le calendrier
     const calendarTable = document.createElement("table");
 
@@ -66,7 +70,7 @@ export async function showCalendar(
     calendarTable.appendChild(headerRow);
 
     // Calcule le nombre de jours dans le mois
-    const daysInMonth = new Date(targetYear, targetMonth, 0).getDate();
+    const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
 
     // Calcule le jour de la semaine pour le premier jour du mois
     const startDayOfWeek = new Date(targetYear, targetMonth, 1).getDay();
@@ -75,7 +79,6 @@ export async function showCalendar(
     const currentDate = new Date();
     const currentDay = currentDate.getDate();
 
-    // Crée des lignes et des cellules pour chaque jour du mois
     let dayIndex = 1;
     for (let i = 0; i < 6; i++) {
       const calendarRow = document.createElement("tr");
@@ -87,6 +90,21 @@ export async function showCalendar(
 
         calendarCell.classList.add("day");
         eventCell.classList.add("event");
+
+        // Obtient la date du jour actuel dans la boucle
+        const currentDate = new Date(targetYear, targetMonth, dayIndex);
+
+        
+
+        // Affiche les événements pour cette date
+        const eventsForDay = events.filter((event) => {
+          const eventStartDate = new Date(event.date_deb);
+          const eventEndDate = new Date(event.date_fin);
+
+          // Vérifie si la date actuelle est comprise entre la date de début (inclus) et la date de fin de l'événement
+          return currentDate.getTime() >= eventStartDate.getTime() && currentDate.getTime() <= eventEndDate.getTime();
+        });
+
         // Remplit la cellule avec le jour s'il est dans le mois
         if (i === 0 && j < startDayOfWeek) {
           // Ajoute des cellules vides pour les jours avant le début du mois
@@ -102,6 +120,17 @@ export async function showCalendar(
             targetYear === currentDate.getFullYear()
           ) {
             calendarCell.classList.add("actualDay");
+          }
+
+          // Ajoute la cellule d'événement seulement s'il y a des événements pour ce jour
+          if (eventsForDay.length > 0) {
+            console.log(currentDate);
+            
+            eventsForDay.forEach((event) => {
+              const eventElement = document.createElement("div");
+              eventElement.textContent = event.titre; // Vous pouvez personnaliser ceci
+              eventCell.appendChild(eventElement);
+            });
           }
 
           dayIndex++;
@@ -162,21 +191,21 @@ export function showCreateEvent() {
   const eventForm = document.createElement("form");
   eventForm.innerHTML = `
   <div class="event-card">
-    <div>
+    <div class="event-card-element">
       <label for="event-titre">Titre:</label>
       <input type="text" id="event-titre" name="event-titre" required>
     </div>
-    <div>
+    <div class="event-card-element">
       <label for="event-location">Location:</label>
       <input type="text" id="event-location" name="event-location" required>
     </div>
   </div>
   <div class="event-card">
-    <div>
+    <div class="event-card-element">
       <label for="event-date-deb">Date de début:</label>
       <input type="date" id="event-date-deb" name="event-date-deb" required>
     </div>
-    <div>
+    <div class="event-card-element">
       <label for="event-date-fin">Date de fin:</label>
       <input type="date" id="event-date-fin" name="event-date-fin" required>
     </div>
@@ -208,8 +237,8 @@ export function showCreateEvent() {
     <textarea id="event-description" placeholder="Description" name="event-description" required></textarea>
   </div>
 
-    <button type="submit">Créer l'événement</button>
-  `;
+    <button type="submit">Créer l'événement</button>`
+  ;
 
   // Ajoute un gestionnaire d'événement pour le formulaire de création d'événement
   eventForm.addEventListener("submit", async (event) => {
