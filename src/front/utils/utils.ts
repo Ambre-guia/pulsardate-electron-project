@@ -15,7 +15,7 @@ export async function showCalendar(
 
     // Bouton précédent
     const previousButton = document.createElement("button");
-    previousButton.textContent = "previous month";
+    previousButton.textContent = "";
     previousButton.classList.add("left");
     previousButton.addEventListener("click", async () => {
       const newDate = new Date(targetYear, targetMonth - 1, 1);
@@ -29,7 +29,7 @@ export async function showCalendar(
 
     // Bouton suivant
     const nextButton = document.createElement("button");
-    nextButton.textContent = "next month";
+    nextButton.textContent = "";
     nextButton.classList.add("right");
     nextButton.addEventListener("click", async () => {
       const newDate = new Date(targetYear, targetMonth + 1, 1);
