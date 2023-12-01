@@ -58,6 +58,8 @@ export async function showCalendar(container, targetMonth, targetYear) {
             let rowIsEmpty = true; // Variable pour suivre si la ligne est vide
             for (let j = 0; j < 7; j++) {
                 const calendarCell = document.createElement("td");
+                const eventCell = document.createElement("div");
+                calendarCell.classList.add("day");
                 // Remplit la cellule avec le jour s'il est dans le mois
                 if (i === 0 && j < startDayOfWeek) {
                     // Ajoute des cellules vides pour les jours avant le début du mois
@@ -75,6 +77,7 @@ export async function showCalendar(container, targetMonth, targetYear) {
                     dayIndex++;
                     rowIsEmpty = false; // La ligne n'est pas vide
                 }
+                calendarCell.appendChild(eventCell);
                 calendarRow.appendChild(calendarCell);
             }
             // Vérifie si la ligne n'est pas vide avant de l'ajouter

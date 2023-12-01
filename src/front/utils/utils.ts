@@ -83,7 +83,10 @@ export async function showCalendar(
 
       for (let j = 0; j < 7; j++) {
         const calendarCell = document.createElement("td");
+        const eventCell = document.createElement("div");
 
+        calendarCell.classList.add("day");
+        eventCell.classList.add("event");
         // Remplit la cellule avec le jour s'il est dans le mois
         if (i === 0 && j < startDayOfWeek) {
           // Ajoute des cellules vides pour les jours avant le début du mois
@@ -105,6 +108,7 @@ export async function showCalendar(
           rowIsEmpty = false; // La ligne n'est pas vide
         }
 
+        calendarCell.appendChild(eventCell);
         calendarRow.appendChild(calendarCell);
       }
 
