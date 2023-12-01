@@ -103,6 +103,7 @@ export async function showCalendar(
   }
 }
 
+
 function createNavigationButtons(
   container: HTMLElement,
   targetMonth: number,

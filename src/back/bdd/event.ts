@@ -26,41 +26,30 @@ export async function createEvent(event: IEvent): Promise<number | null> {
 // READ
 export async function getEventById(eventId: number): Promise<IEvent | null> {
   return new Promise((resolve, reject) => {
-    log.query(
-      "SELECT * FROM event WHERE id = ?",
-      [eventId],
-      (err: any, result: any) => {
-        if (err) {
-          reject(err);
+    log.query("SELECT * FROM event WHERE id = ?", [eventId], (err: any, result: any) => {
+      if (err) {
+        reject(err);
+      } else {
+        if (result.length === 0) {
+          resolve(null); 
         } else {
-          if (result.length === 0) {
-            resolve(null);
-          } else {
-            resolve(result[0]);
-          }
+          resolve(result[0]);
         }
       }
-    );
+    });
   });
 }
 
 // UPDATE
-export async function updateEvent(
-  eventId: number,
-  updatedEvent: IEvent
-): Promise<boolean> {
+export async function updateEvent(eventId: number, updatedEvent: IEvent): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    log.query(
-      "UPDATE event SET ? WHERE id = ?",
-      [updatedEvent, eventId],
-      (err: any) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(true);
-        }
+    log.query("UPDATE event SET ? WHERE id = ?", [updatedEvent, eventId], (err: any) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(true); 
       }
-    );
+    });
   });
 }
 
@@ -71,7 +60,7 @@ export async function deleteEvent(eventId: number): Promise<boolean> {
       if (err) {
         reject(err);
       } else {
-        resolve(true);
+        resolve(true); 
       }
     });
   });

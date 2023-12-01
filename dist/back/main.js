@@ -4,11 +4,55 @@ const electron_1 = require("electron");
 const path = require("path");
 const event_js_1 = require("./bdd/event.js");
 const date_js_1 = require("./inc/date.js");
-//Zone de handle
+// Handle to get all events
 electron_1.ipcMain.handle("get-events", async (event) => await (0, event_js_1.getAll)());
+// Handle to create a new event
+electron_1.ipcMain.handle("create-event", async (event, newEvent) => {
+    try {
+        return await (0, event_js_1.createEvent)(newEvent);
+    }
+    catch (error) {
+        console.error("Error creating event:", error);
+        throw error;
+    }
+});
+// Handle to get an event by ID
+electron_1.ipcMain.handle("get-event-by-id", async (event, eventId) => {
+    try {
+        return await (0, event_js_1.getEventById)(eventId);
+    }
+    catch (error) {
+        console.error("Error getting event by ID:", error);
+        throw error;
+    }
+});
+// Handle to update an existing event
+electron_1.ipcMain.handle("update-event", async (event, eventId, updatedEvent) => {
+    try {
+        return await (0, event_js_1.updateEvent)(eventId, updatedEvent);
+    }
+    catch (error) {
+        console.error("Error updating event:", error);
+        throw error;
+    }
+});
+// Handle to delete an event by ID
+electron_1.ipcMain.handle("delete-event", async (event, eventId) => {
+    try {
+        return await (0, event_js_1.deleteEvent)(eventId);
+    }
+    catch (error) {
+        console.error("Error deleting event:", error);
+        throw error;
+    }
+});
+// Handle to get the current month
 electron_1.ipcMain.handle("get-current-month", async (event) => (0, date_js_1.getCurrentMonth)());
+// Handle to get the current year
 electron_1.ipcMain.handle("get-current-year", async (event) => (0, date_js_1.getCurrentYear)());
+// Handle to get the first day of the month
 electron_1.ipcMain.handle("get-first-day-of-month", async (event, month, year) => (0, date_js_1.getFirstDayOfMonth)(month, year));
+// Handle to get the last day of the month
 electron_1.ipcMain.handle("get-last-day-of-month", async (event, month, year) => (0, date_js_1.getLastDayOfMonth)(month, year));
 function createWindow() {
     // Create the browser window.
