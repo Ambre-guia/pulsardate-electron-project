@@ -161,38 +161,52 @@ export function showCreateEvent() {
   // Crée le formulaire de création d'événement
   const eventForm = document.createElement("form");
   eventForm.innerHTML = `
-    <label for="event-date-deb">Date de début:</label>
-    <input type="date" id="event-date-deb" name="event-date-deb" required><br>
+  <div class="event-card">
+    <div>
+      <label for="event-titre">Titre:</label>
+      <input type="text" id="event-titre" name="event-titre" required>
+    </div>
+    <div>
+      <label for="event-location">Location:</label>
+      <input type="text" id="event-location" name="event-location" required>
+    </div>
+  </div>
+  <div class="event-card">
+    <div>
+      <label for="event-date-deb">Date de début:</label>
+      <input type="date" id="event-date-deb" name="event-date-deb" required>
+    </div>
+    <div>
+      <label for="event-date-fin">Date de fin:</label>
+      <input type="date" id="event-date-fin" name="event-date-fin" required>
+    </div>
+  </div>
 
-    <label for="event-date-fin">Date de fin:</label>
-    <input type="date" id="event-date-fin" name="event-date-fin" required><br>
-
-    <label for="event-titre">Titre:</label>
-    <input type="text" id="event-titre" name="event-titre" required><br>
-
-    <label for="event-location">Location:</label>
-    <input type="text" id="event-location" name="event-location" required><br>
-
+  <div class="event-card">
     <label for="event-categorie">Catégorie:</label>
-    <input type="text" id="event-categorie" name="event-categorie" required><br>
+    <input type="text" id="event-categorie" name="event-categorie" required>
+  </div>
 
+  <div class="event-card">
     <label for="event-statut">Statut:</label>
     <select id="event-statut" name="event-statut" required>
       <option value="TENTATIVE">Tentative</option>
       <option value="CONFIRMED">Confirmé</option>
       <option value="CANCELED">Annulé</option>
-    </select><br>
-
-    <label for="event-description">Description:</label>
-    <textarea id="event-description" name="event-description" required></textarea><br>
-
+    </select>
+  </div>
+  
+  <div class="event-card">
     <label for="event-transparence">Transparence:</label>
     <select id="event-transparence" name="event-transparence" required>
       <option value="OPAQUE">Opaque</option>
       <option value="TRANSPARENT">Transparent</option>
-    </select><br>
+    </select>
+  </div>
 
-    <!-- Champ nbMaj retiré -->
+  <div class="event-card">
+    <textarea id="event-description" placeholder="Description" name="event-description" required></textarea>
+  </div>
 
     <button type="submit">Créer l'événement</button>
   `;
