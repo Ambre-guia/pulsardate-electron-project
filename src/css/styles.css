@@ -17,6 +17,43 @@ body {
 
 /* Add styles here to customize the appearance of your app */
 
+/* ===============
+   APP
+   =============== */
+
+/* ======= header ======= */
+
+header {
+  height: 50px;
+  width: 420px;
+  text-align: center;
+  position: relative;
+  z-index: 100;
+}
+header .title {
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  line-height: 50px;
+  font-weight: 100;
+  letter-spacing: 1px;
+}
+
+/*  BUTTONS  */
+.btn {
+  width: 15rem;
+  height: 4rem;
+  border-radius: 1rem;
+  box-shadow: 0.3rem 0.3rem 0.6rem #c8d0e7;
+  justify-self: center;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+/* ======= Table ======= */
+
 table {
   height: 100%;
   position: relative;
@@ -33,4 +70,17 @@ table td {
   background-color: #fff;
   border: 1px solid #ddd;
   color: #000;
+}
+
+.actualDay {
+  display: inline-block;
+  width: 27px;
+  height: 27px;
+  line-height: 27px;
+  text-align: center;
+  background: #135de6;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: bold;
+  margin-left: 2px;
 }

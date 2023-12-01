@@ -1,4 +1,4 @@
-import { app, ipcMain, BrowserWindow } from "electron";
+import { app, ipcMain, BrowserWindow, Menu } from "electron";
 import * as path from "path";
 import {
   getAll,
@@ -73,6 +73,8 @@ ipcMain.handle("get-last-day-of-month", async (event, month, year) =>
   getLastDayOfMonth(month, year)
 );
 
+ipcMain.handle("open-event-window", () => createWindowEvent());
+
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -89,6 +91,46 @@ function createWindow() {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 }
+
+function createWindowEvent() {
+  // Create the event window.
+  const eventWindow = new BrowserWindow({
+    height: 400,
+    width: 600,
+    webPreferences: {
+      preload: path.join(__dirname, "./preload.js"),
+    },
+  });
+
+  // Load the event.html file.
+  eventWindow.loadFile(path.join(__dirname, "../../event.html"));
+
+  // Open the DevTools (optional).
+  eventWindow.webContents.openDevTools();
+
+  return eventWindow;
+}
+
+// Générer un menu pour l'application
+const menuTemplate = [
+  {
+    label: "Event",
+    submenu: [
+      {
+        label: "Creer un event",
+        click: () => {
+          createWindowEvent();
+        },
+      },
+    ],
+  },
+];
+
+// Créer le menu à partir du modèle
+const menu = Menu.buildFromTemplate(menuTemplate);
+
+// Définir le menu de l'application
+Menu.setApplicationMenu(menu);
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
