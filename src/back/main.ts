@@ -88,6 +88,9 @@ function createWindow() {
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, "../../index.html"));
 
+  ipcMain.on('reload-window', () => {
+    mainWindow.reload();
+  });
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 }
@@ -107,6 +110,11 @@ function createWindowEvent() {
 
   // Open the DevTools (optional).
   eventWindow.webContents.openDevTools();
+
+  // Gère le message pour fermer la fenêtre de l'événement
+  ipcMain.on('close-event-window', () => {
+    eventWindow.close();
+  });
 
   return eventWindow;
 }

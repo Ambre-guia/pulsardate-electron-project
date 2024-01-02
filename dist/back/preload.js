@@ -86,5 +86,23 @@ contextBridge.exposeInMainWorld("electron", {
             throw error;
         }
     },
+    closeWindow: () => {
+        try {
+            ipcRenderer.send("close-event-window");
+        }
+        catch (error) {
+            console.error("Error invoking close-event-window:", error);
+            throw error;
+        }
+    },
+    reloadWindow: () => {
+        try {
+            ipcRenderer.send("reload-window");
+        }
+        catch (err) {
+            console.error("Error invoking reload-windo", err);
+            throw err;
+        }
+    }
 });
 //# sourceMappingURL=preload.js.map

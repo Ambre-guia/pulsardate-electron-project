@@ -66,6 +66,9 @@ function createWindow() {
     });
     // and load the index.html of the app.
     mainWindow.loadFile(path.join(__dirname, "../../index.html"));
+    electron_1.ipcMain.on('reload-window', () => {
+        mainWindow.reload();
+    });
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
 }
@@ -82,6 +85,10 @@ function createWindowEvent() {
     eventWindow.loadFile(path.join(__dirname, "../../event.html"));
     // Open the DevTools (optional).
     eventWindow.webContents.openDevTools();
+    // Gère le message pour fermer la fenêtre de l'événement
+    electron_1.ipcMain.on('close-event-window', () => {
+        eventWindow.close();
+    });
     return eventWindow;
 }
 // Générer un menu pour l'application

@@ -3,7 +3,8 @@ import { IEvent } from "../../interfaces/event.js";
 export async function showCalendar(
   container: HTMLElement,
   targetMonth: number,
-  targetYear: number
+  targetYear: number,
+  refreshCalendarCallback?: (container: HTMLElement, month: number, year: number) => Promise<void>
 ): Promise<void> {
   try {
     // Supprimer le contenu existant du conteneur
@@ -79,32 +80,37 @@ export async function showCalendar(
     const currentDate = new Date();
     const currentDay = currentDate.getDate();
 
+    
     let dayIndex = 1;
     for (let i = 0; i < 6; i++) {
       const calendarRow = document.createElement("tr");
       let rowIsEmpty = true; // Variable pour suivre si la ligne est vide
-
+      
       for (let j = 0; j < 7; j++) {
         const calendarCell = document.createElement("td");
         const eventCell = document.createElement("div");
-
+        
         calendarCell.classList.add("day");
         eventCell.classList.add("event");
-
+        
         // Obtient la date du jour actuel dans la boucle
         const currentDate = new Date(targetYear, targetMonth, dayIndex);
-
         
-
         // Affiche les événements pour cette date
         const eventsForDay = events.filter((event) => {
           const eventStartDate = new Date(event.date_deb);
           const eventEndDate = new Date(event.date_fin);
-
+          
+          // Récupère la date sans tenir compte de l'heure, des minutes, etc.
+          const currentDateWithoutTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+          const eventStartDateWithoutTime = new Date(eventStartDate.getFullYear(), eventStartDate.getMonth(), eventStartDate.getDate());
+          const eventEndDateWithoutTime = new Date(eventEndDate.getFullYear(), eventEndDate.getMonth(), eventEndDate.getDate());
+          
           // Vérifie si la date actuelle est comprise entre la date de début (inclus) et la date de fin de l'événement
-          return currentDate.getTime() >= eventStartDate.getTime() && currentDate.getTime() <= eventEndDate.getTime();
+          return currentDateWithoutTime.getTime() >= eventStartDateWithoutTime.getTime() && currentDateWithoutTime.getTime() <= eventEndDateWithoutTime.getTime();
         });
-
+        
+        
         // Remplit la cellule avec le jour s'il est dans le mois
         if (i === 0 && j < startDayOfWeek) {
           // Ajoute des cellules vides pour les jours avant le début du mois
@@ -112,19 +118,18 @@ export async function showCalendar(
         } else if (dayIndex <= daysInMonth) {
           // Ajoute les jours du mois
           calendarCell.textContent = `${dayIndex}`;
-
+          
           // Ajoute la classe "actualDay" si c'est le jour actuel
           if (
             dayIndex === currentDay &&
             targetMonth === currentDate.getMonth() &&
             targetYear === currentDate.getFullYear()
-          ) {
-            calendarCell.classList.add("actualDay");
-          }
-
-          // Ajoute la cellule d'événement seulement s'il y a des événements pour ce jour
-          if (eventsForDay.length > 0) {
-            console.log(currentDate);
+            ) {
+              calendarCell.classList.add("actualDay");
+            }
+            
+            // Ajoute la cellule d'événement seulement s'il y a des événements pour ce jour
+            if (eventsForDay.length > 0) {
             
             eventsForDay.forEach((event) => {
               const eventElement = document.createElement("div");
@@ -150,8 +155,10 @@ export async function showCalendar(
     // Ajoute la table du calendrier au conteneur
     container.appendChild(calendarTable);
 
-    // Crée le titre du calendrier avec le mois et l'année cibles
-    console.log(targetYear, targetMonth);
+
+    // Call the refresh function if it's provided
+    if (refreshCalendarCallback) {
+      refreshCalendarCallback(container, targetMonth, targetYear);    }
   } catch (error) {
     console.error(
       "Erreur lors de la récupération des données du calendrier :",
@@ -179,8 +186,14 @@ function getMonthName(monthNumber: number): string {
   return months[monthNumber];
 }
 
-export function showCreateEvent() {
-  // Crée une fenêtre modale pour le formulaire de création d'événement
+export function showCreateEvent(
+  container: HTMLElement,
+  targetMonth: number,
+  targetYear: number,
+  refreshCalendarCallback?: (container: HTMLElement, month: number, year: number) => void,
+  closeWindow?: () => void,
+  reloadWindow?: () => void
+) {
   const createEventModal = document.createElement("div");
   createEventModal.classList.add("create-event-modal");
 
@@ -237,6 +250,7 @@ export function showCreateEvent() {
     <button type="submit">Créer l'événement</button>`
   ;
 
+  
   // Ajoute un gestionnaire d'événement pour le formulaire de création d'événement
   eventForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -286,9 +300,11 @@ export function showCreateEvent() {
     // Vous pouvez envoyer cet objet à votre backend via IPC pour créer l'événement
     try {
       await window.electron.createEvent(newEvent);
-      // Ferme la fenêtre modale après la création de l'événement (à implémenter)
-      createEventModal.style.display = "none";
-    } catch (error) {
+
+      closeWindow();
+      reloadWindow();
+    } 
+    catch (error) {
       console.error("Erreur lors de la création de l'événement :", error);
       // Gérer l'erreur de création d'événement
       // Vous pourriez afficher un message à l'utilisateur ou effectuer d'autres actions

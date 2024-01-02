@@ -4,8 +4,19 @@
 // nodeIntegration is set to true in webPreferences.
 // Use preload.js to selectively enable features
 // needed in the renderer process.
-
 import { showCreateEvent, showCalendar } from "./utils/utils.js";
+
+// Import the function closeWindow from the preload script
+const closeWindow = window.electron.closeWindow;
+const reloadWindow = window.electron.reloadWindow;
+
+// Declare the refresh function outside the if block
+const refreshCalendar = async (container: HTMLElement, month: number, year: number) => {
+  console.log('Refreshing calendar with:', month, year);
+  await showCalendar(container, month, year);
+  console.log('Calendar refreshed.');
+};
+
 
 (async () => {
   try {
@@ -13,23 +24,24 @@ import { showCreateEvent, showCalendar } from "./utils/utils.js";
     const calendarContainer = document.getElementById("tableCalendar");
     const eventContainer = document.getElementById("eventContainer");
 
-    if (calendarContainer) {
-      // Get the current month and year
-      const currentDate = new Date();
-      const currentMonth = currentDate.getMonth();
-      const currentYear = currentDate.getFullYear();
+    // Get the current month and year outside the if block
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
 
-      // Call the showCalendar function with the current month and year
-      await showCalendar(calendarContainer, currentMonth, currentYear);
+    if (calendarContainer) {
+      // Call the showCalendar function with the current month and year and pass the refresh function
+      await showCalendar(calendarContainer, currentMonth, currentYear, refreshCalendar);
     }
+
     if (eventContainer) {
       const events = await window.electron.getAll();
       console.log(events);
 
-      await showCreateEvent();
+      // Pass the refresh function to showCreateEvent
+      await showCreateEvent(eventContainer, currentMonth, currentYear, () => refreshCalendar(calendarContainer, currentMonth, currentYear), closeWindow, reloadWindow);
     }
   } catch (err) {
     console.error(err);
   }
 })();
-

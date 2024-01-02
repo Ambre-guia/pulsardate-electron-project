@@ -10,6 +10,8 @@ declare global {
       getFirstDayOfMonth: (month: number, year: number) => Promise<any>;
       getLastDayOfMonth: (month: number, year: number) => Promise<any>;
       createEvent: (event: IEvent) => Promise<number | null>;
+      closeWindow: () => void; 
+      reloadWindow: () => void;
     };
   }
 }
