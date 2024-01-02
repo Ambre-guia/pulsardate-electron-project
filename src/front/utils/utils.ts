@@ -176,10 +176,7 @@ function getMonthName(monthNumber: number): string {
     "Décembre",
   ];
 
-  // Ajuste le numéro du mois pour qu'il soit dans la plage de 0 à 11
-  const adjustedMonthNumber = (monthNumber + 12) % 12;
-
-  return months[adjustedMonthNumber];
+  return months[monthNumber];
 }
 
 export function showCreateEvent() {

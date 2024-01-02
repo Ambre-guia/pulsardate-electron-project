@@ -131,6 +131,7 @@ function getMonthName(monthNumber) {
     ];
     // Ajuste le numéro du mois pour qu'il soit dans la plage de 0 à 11
     const adjustedMonthNumber = (monthNumber + 12) % 12;
+    console.log(adjustedMonthNumber, monthNumber);
     return months[adjustedMonthNumber];
 }
 export function showCreateEvent() {
@@ -141,21 +142,21 @@ export function showCreateEvent() {
     const eventForm = document.createElement("form");
     eventForm.innerHTML = `
   <div class="event-card">
-    <div>
+    <div class="event-card-element">
       <label for="event-titre">Titre:</label>
       <input type="text" id="event-titre" name="event-titre" required>
     </div>
-    <div>
+    <div class="event-card-element">
       <label for="event-location">Location:</label>
       <input type="text" id="event-location" name="event-location" required>
     </div>
   </div>
   <div class="event-card">
-    <div>
+    <div class="event-card-element">
       <label for="event-date-deb">Date de début:</label>
       <input type="date" id="event-date-deb" name="event-date-deb" required>
     </div>
-    <div>
+    <div class="event-card-element">
       <label for="event-date-fin">Date de fin:</label>
       <input type="date" id="event-date-fin" name="event-date-fin" required>
     </div>
@@ -187,8 +188,7 @@ export function showCreateEvent() {
     <textarea id="event-description" placeholder="Description" name="event-description" required></textarea>
   </div>
 
-    <button type="submit">Créer l'événement</button>
-  `;
+    <button type="submit">Créer l'événement</button>`;
     // Ajoute un gestionnaire d'événement pour le formulaire de création d'événement
     eventForm.addEventListener("submit", async (event) => {
         event.preventDefault();
