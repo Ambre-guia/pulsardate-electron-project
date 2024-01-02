@@ -53,6 +53,9 @@ export async function showCalendar(container, targetMonth, targetYear, refreshCa
         // Obtient le jour actuel
         const currentDate = new Date();
         const currentDay = currentDate.getDate();
+        const actualDay = currentDate;
+        const actualMonth = currentDate.getMonth();
+        const actualYear = currentDate.getFullYear();
         let dayIndex = 1;
         for (let i = 0; i < 6; i++) {
             const calendarRow = document.createElement("tr");
@@ -73,7 +76,9 @@ export async function showCalendar(container, targetMonth, targetYear, refreshCa
                     const eventStartDateWithoutTime = new Date(eventStartDate.getFullYear(), eventStartDate.getMonth(), eventStartDate.getDate());
                     const eventEndDateWithoutTime = new Date(eventEndDate.getFullYear(), eventEndDate.getMonth(), eventEndDate.getDate());
                     // Vérifie si la date actuelle est comprise entre la date de début (inclus) et la date de fin de l'événement
-                    return currentDateWithoutTime.getTime() >= eventStartDateWithoutTime.getTime() && currentDateWithoutTime.getTime() <= eventEndDateWithoutTime.getTime();
+                    return (currentDateWithoutTime.getTime() >=
+                        eventStartDateWithoutTime.getTime() &&
+                        currentDateWithoutTime.getTime() <= eventEndDateWithoutTime.getTime());
                 });
                 // Remplit la cellule avec le jour s'il est dans le mois
                 if (i === 0 && j < startDayOfWeek) {
@@ -83,14 +88,10 @@ export async function showCalendar(container, targetMonth, targetYear, refreshCa
                 else if (dayIndex <= daysInMonth) {
                     // Ajoute les jours du mois
                     calendarCell.textContent = `${dayIndex}`;
-                    // Supprime la classe "actualDay" de tous les éléments de calendrier
-                    document.querySelectorAll('.actualDay').forEach(function (element) {
-                        element.classList.remove('actualDay');
-                    });
                     // Ajoute la classe "actualDay" si c'est le jour actuel
-                    if (dayIndex === currentDay &&
-                        targetMonth === currentDate.getMonth() &&
-                        targetYear === currentDate.getFullYear()) {
+                    if (currentDate.getFullYear() === actualYear &&
+                        currentDate.getMonth() === actualMonth &&
+                        dayIndex === actualDay.getDate()) {
                         calendarCell.classList.add("actualDay");
                     }
                     // Ajoute la cellule d'événement seulement s'il y a des événements pour ce jour

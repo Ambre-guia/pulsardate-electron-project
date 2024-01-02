@@ -80,37 +80,54 @@ export async function showCalendar(
     const currentDate = new Date();
     const currentDay = currentDate.getDate();
 
-    
+    const actualDay = currentDate;
+    const actualMonth = currentDate.getMonth();
+    const actualYear = currentDate.getFullYear();
     let dayIndex = 1;
     for (let i = 0; i < 6; i++) {
       const calendarRow = document.createElement("tr");
       let rowIsEmpty = true; // Variable pour suivre si la ligne est vide
-      
+    
       for (let j = 0; j < 7; j++) {
         const calendarCell = document.createElement("td");
         const eventCell = document.createElement("div");
-        
+    
         calendarCell.classList.add("day");
         eventCell.classList.add("event");
-        
+    
         // Obtient la date du jour actuel dans la boucle
         const currentDate = new Date(targetYear, targetMonth, dayIndex);
-        
+    
         // Affiche les événements pour cette date
         const eventsForDay = events.filter((event) => {
           const eventStartDate = new Date(event.date_deb);
           const eventEndDate = new Date(event.date_fin);
-          
+    
           // Récupère la date sans tenir compte de l'heure, des minutes, etc.
-          const currentDateWithoutTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-          const eventStartDateWithoutTime = new Date(eventStartDate.getFullYear(), eventStartDate.getMonth(), eventStartDate.getDate());
-          const eventEndDateWithoutTime = new Date(eventEndDate.getFullYear(), eventEndDate.getMonth(), eventEndDate.getDate());
-          
+          const currentDateWithoutTime = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth(),
+            currentDate.getDate()
+          );
+          const eventStartDateWithoutTime = new Date(
+            eventStartDate.getFullYear(),
+            eventStartDate.getMonth(),
+            eventStartDate.getDate()
+          );
+          const eventEndDateWithoutTime = new Date(
+            eventEndDate.getFullYear(),
+            eventEndDate.getMonth(),
+            eventEndDate.getDate()
+          );
+    
           // Vérifie si la date actuelle est comprise entre la date de début (inclus) et la date de fin de l'événement
-          return currentDateWithoutTime.getTime() >= eventStartDateWithoutTime.getTime() && currentDateWithoutTime.getTime() <= eventEndDateWithoutTime.getTime();
+          return (
+            currentDateWithoutTime.getTime() >=
+              eventStartDateWithoutTime.getTime() &&
+            currentDateWithoutTime.getTime() <= eventEndDateWithoutTime.getTime()
+          );
         });
-        
-        
+    
         // Remplit la cellule avec le jour s'il est dans le mois
         if (i === 0 && j < startDayOfWeek) {
           // Ajoute des cellules vides pour les jours avant le début du mois
@@ -118,40 +135,39 @@ export async function showCalendar(
         } else if (dayIndex <= daysInMonth) {
           // Ajoute les jours du mois
           calendarCell.textContent = `${dayIndex}`;
-          
+    
           // Ajoute la classe "actualDay" si c'est le jour actuel
           if (
-            dayIndex === currentDay &&
-            targetMonth === currentDate.getMonth() &&
-            targetYear === currentDate.getFullYear()
-            ) {
-              calendarCell.classList.add("actualDay");
-            }
-            
-            // Ajoute la cellule d'événement seulement s'il y a des événements pour ce jour
-            if (eventsForDay.length > 0) {
-            
+            currentDate.getFullYear() === actualYear &&
+            currentDate.getMonth() === actualMonth &&
+            dayIndex === actualDay.getDate()
+          ) {
+            calendarCell.classList.add("actualDay");
+          }
+
+          // Ajoute la cellule d'événement seulement s'il y a des événements pour ce jour
+          if (eventsForDay.length > 0) {
             eventsForDay.forEach((event) => {
               const eventElement = document.createElement("div");
               eventElement.textContent = event.titre; // Vous pouvez personnaliser ceci
               eventCell.appendChild(eventElement);
             });
           }
-
+    
           dayIndex++;
           rowIsEmpty = false; // La ligne n'est pas vide
         }
-
+    
         calendarCell.appendChild(eventCell);
         calendarRow.appendChild(calendarCell);
       }
-
+    
       // Vérifie si la ligne n'est pas vide avant de l'ajouter
       if (!rowIsEmpty) {
         calendarTable.appendChild(calendarRow);
       }
     }
-
+    
     // Ajoute la table du calendrier au conteneur
     container.appendChild(calendarTable);
 
