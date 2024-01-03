@@ -75,6 +75,17 @@ ipcMain.handle("get-last-day-of-month", async (event, month, year) =>
 
 ipcMain.handle("open-event-window", () => createWindowEvent());
 
+ipcMain.handle("open-update-event-window", (event, eventId) => {
+  try {
+    console.log("asrzae", eventId);
+    
+    createUpdateWindowEvent(eventId);
+    return true;
+  } catch (error) {
+    console.error("Error opening update event window:", error);
+    return false;
+  }
+});
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -98,14 +109,14 @@ function createWindow() {
 function createWindowEvent() {
   // Create the event window.
   const eventWindow = new BrowserWindow({
-    height: 400,
-    width: 600,
+    height: 600,
+    width: 800,
     webPreferences: {
       preload: path.join(__dirname, "./preload.js"),
     },
   });
 
-  // Load the event.html file.
+    // Load the event.html file.
   eventWindow.loadFile(path.join(__dirname, "../../event.html"));
 
   // Open the DevTools (optional).
@@ -113,12 +124,49 @@ function createWindowEvent() {
 
   // Gère le message pour fermer la fenêtre de l'événement
   ipcMain.on('close-event-window', () => {
-    eventWindow.close();
+    eventWindow.destroy();
   });
 
   return eventWindow;
 }
 
+function createUpdateWindowEvent(eventId: number){
+  const updateEventWindow = new BrowserWindow({
+    height: 600,
+    width: 800,
+    webPreferences: {
+      preload: path.join(__dirname, "./preload.js"),
+    },
+  });
+
+  // Charge le fichier event.html
+  updateEventWindow.loadFile(path.join(__dirname, "../../update-event.html"));
+
+  // Ouvre les DevTools (facultatif)
+  updateEventWindow.webContents.openDevTools();
+
+  // Gère le message pour recharger la page avec l'eventId
+  ipcMain.on("reload-update-event-window", (event, eventId) => {
+    updateEventWindow.reload()
+    getEventById(eventId).then((event) => {
+      setTimeout(()=>{
+       updateEventWindow.webContents.send("event-update-event-window", event)
+      },200)
+     })
+  });
+
+  getEventById(eventId).then((event) => {
+   setTimeout(()=>{
+    updateEventWindow.webContents.send("event-update-event-window", event)
+   },200)
+  })
+  // Gère le message pour fermer la fenêtre de mise à jour de l'événement
+  ipcMain.on('close-update-event-window', () => {
+    updateEventWindow.close();
+  });
+
+  return updateEventWindow;
+}
 // Générer un menu pour l'application
 const menuTemplate = [
   {

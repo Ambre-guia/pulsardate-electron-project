@@ -11,7 +11,13 @@ declare global {
       getLastDayOfMonth: (month: number, year: number) => Promise<any>;
       createEvent: (event: IEvent) => Promise<number | null>;
       closeWindow: () => void; 
+      closeUpdateWindow: () => void;
       reloadWindow: () => void;
+      reloadUpdateWindow: (eventId: number) => Promise<any>;
+      getEventById: (eventId: number) => Promise<any>;
+      createUpdateWindowEvent:(eventId: number) => Promise<any>;
+      onUpdateEvent: (cb: any) => void;
+      updateEvent:(eventId: number, updatedEvent: IEvent)=> Promise<any>;
     };
   }
 }

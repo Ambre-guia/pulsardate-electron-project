@@ -98,7 +98,15 @@ export async function showCalendar(container, targetMonth, targetYear, refreshCa
                     if (eventsForDay.length > 0) {
                         eventsForDay.forEach((event) => {
                             const eventElement = document.createElement("div");
-                            eventElement.textContent = event.titre; // Vous pouvez personnaliser ceci
+                            eventElement.textContent = event.titre;
+                            // Add the click event listener to each eventElement
+                            eventElement.addEventListener("click", async () => {
+                                // Ouvrir la fenêtre de mise à jour ici
+                                //window.electron.createUpdateWindow();
+                                await showUpdateEvent(event.id);
+                                // Afficher l'eventId dans le console.log du renderer.ts
+                                console.log("Received eventId in renderer:", event.id);
+                            });
                             eventCell.appendChild(eventElement);
                         });
                     }
@@ -237,4 +245,156 @@ export function showCreateEvent(container, targetMonth, targetYear, refreshCalen
     createEventModal.appendChild(eventForm);
     // Ajoute la fenêtre modale à la page principale
     document.body.appendChild(createEventModal);
+}
+export function showUpdateEvent(eventId) {
+    try {
+        window.electron.createUpdateWindowEvent(eventId);
+    }
+    catch (err) {
+        console.error(err);
+    }
+}
+// Variable pour suivre l'état du formulaire
+let isFormOpen = false;
+let currentUpdateEventModal; // Garder une référence à la fenêtre modale pour la fermeture
+export function showEvent(event) {
+    const showEventContainer = document.createElement("div");
+    showEventContainer.classList.add("show-event-container");
+    // Affiche l'événement de base
+    const basicEventInfo = document.createElement("div");
+    basicEventInfo.innerHTML = `
+    <h2>${event.titre}</h2>
+    <p>Location: ${event.location}</p>
+    <p>Date de début: ${event.date_deb}</p>
+    <p>Date de fin: ${event.date_fin}</p>
+    <p>Catégorie: ${event.categorie}</p>
+    <p>Statut: ${event.statut}</p>
+    <p>Transparence: ${event.transparence}</p>
+    <p>Description: ${event.description}</p>
+  `;
+    showEventContainer.appendChild(basicEventInfo);
+    // Ajoute un bouton pour ouvrir/fermer le formulaire de modification
+    const editButton = document.createElement("button");
+    editButton.textContent = "Modifier l'événement";
+    editButton.addEventListener("click", () => toggleUpdateEventForm(event));
+    showEventContainer.appendChild(editButton);
+    // Ajoute un bouton pour fermer la fenêtre
+    const closeButton = document.createElement("button");
+    closeButton.textContent = "Fermer la fenêtre";
+    closeButton.addEventListener("click", () => window.electron.closeUpdateWindow());
+    showEventContainer.appendChild(closeButton);
+    // Ajoute le conteneur à la page principale
+    document.body.appendChild(showEventContainer);
+}
+export function updateEventForm(event) {
+    const updateEventModal = document.createElement("div");
+    updateEventModal.classList.add("update-event-modal");
+    // Crée le formulaire de modification d'événement
+    const updateEventForm = document.createElement("form");
+    updateEventForm.innerHTML = `
+    <div class="event-card">
+      <div class="event-card-element">
+        <label for="event-titre">Titre:</label>
+        <input type="text" id="event-titre" name="event-titre" value="${event.titre}" required>
+      </div>
+      <div class="event-card-element">
+        <label for="event-location">Location:</label>
+        <input type="text" id="event-location" name="event-location" value="${event.location}" required>
+      </div>
+    </div>
+    <div class="event-card">
+      <div class="event-card-element">
+        <label for="event-date-deb">Date de début:</label>
+        <input type="date" id="event-date-deb" name="event-date-deb" value="${event.date_deb}" required>
+      </div>
+      <div class="event-card-element">
+        <label for="event-date-fin">Date de fin:</label>
+        <input type="date" id="event-date-fin" name="event-date-fin" value="${event.date_fin}" required>
+      </div>
+    </div>
+
+    <div class="event-card">
+      <label for="event-categorie">Catégorie:</label>
+      <input type="text" id="event-categorie" name="event-categorie" value="${event.categorie}" required>
+    </div>
+
+    <div class="event-card">
+      <label for="event-statut">Statut:</label>
+      <select id="event-statut" name="event-statut" required>
+        <option value="TENTATIVE" ${event.statut === 'TENTATIVE' ? 'selected' : ''}>Tentative</option>
+        <option value="CONFIRMED" ${event.statut === 'CONFIRMED' ? 'selected' : ''}>Confirmé</option>
+        <option value="CANCELED" ${event.statut === 'CANCELED' ? 'selected' : ''}>Annulé</option>
+      </select>
+    </div>
+    
+    <div class="event-card">
+      <label for="event-transparence">Transparence:</label>
+      <select id="event-transparence" name="event-transparence" required>
+        <option value="OPAQUE" ${event.transparence === 'OPAQUE' ? 'selected' : ''}>Opaque</option>
+        <option value="TRANSPARENT" ${event.transparence === 'TRANSPARENT' ? 'selected' : ''}>Transparent</option>
+      </select>
+    </div>
+
+    <div class="event-card">
+      <textarea id="event-description" placeholder="Description" name="event-description" required>${event.description}</textarea>
+    </div>
+
+    <button type="submit">Modifier l'événement</button>
+  `;
+    // Ajoute le formulaire à la fenêtre modale de modification
+    updateEventModal.appendChild(updateEventForm);
+    // Ajoute la fenêtre modale de modification à la page principale
+    document.body.appendChild(updateEventModal);
+    let nbMajUp;
+    nbMajUp = event.nbMaj + 1;
+    let eventId;
+    eventId = event.id;
+    // Handle form submission here
+    updateEventForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const updatedEvent = {
+            titre: updateEventForm.querySelector("#event-titre").value,
+            location: updateEventForm.querySelector("#event-location").value,
+            date_deb: new Date(updateEventForm.querySelector("#event-date-deb").value),
+            date_fin: new Date(updateEventForm.querySelector("#event-date-fin").value),
+            categorie: updateEventForm.querySelector("#event-categorie").value,
+            statut: updateEventForm.querySelector("#event-statut").value,
+            transparence: updateEventForm.querySelector("#event-transparence").value,
+            description: updateEventForm.querySelector("#event-description").value,
+            nbMaj: nbMajUp,
+        };
+        try {
+            // Update the event using the new values
+            await window.electron.updateEvent(eventId, updatedEvent);
+            await window.electron.reloadUpdateWindow(eventId);
+            await window.electron.reloadWindow();
+            // Close the update event modal
+            closeUpdateEventForm(updateEventModal);
+        }
+        catch (error) {
+            console.error("Erreur lors de la mise à jour de l'événement :", error);
+            // Handle the event update error
+            // You could display a message to the user or take other actions
+        }
+    });
+    return updateEventModal;
+}
+function toggleUpdateEventForm(event) {
+    if (!isFormOpen) {
+        currentUpdateEventModal = updateEventForm(event);
+        // Mettez à jour l'état du formulaire
+        isFormOpen = true;
+    }
+    else {
+        // Ferme le formulaire s'il est déjà ouvert
+        closeUpdateEventForm();
+    }
+}
+function closeUpdateEventForm(updateEventModal) {
+    // Supprime la fenêtre modale de modification de la page
+    if (updateEventModal) {
+        document.body.removeChild(updateEventModal);
+    }
+    // Met à jour l'état du formulaire
+    isFormOpen = false;
 }
