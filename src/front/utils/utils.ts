@@ -87,22 +87,22 @@ export async function showCalendar(
     for (let i = 0; i < 6; i++) {
       const calendarRow = document.createElement("tr");
       let rowIsEmpty = true; // Variable pour suivre si la ligne est vide
-    
+
       for (let j = 0; j < 7; j++) {
         const calendarCell = document.createElement("td");
         const eventCell = document.createElement("div");
-    
+
         calendarCell.classList.add("day");
         eventCell.classList.add("event");
-    
+
         // Obtient la date du jour actuel dans la boucle
         const currentDate = new Date(targetYear, targetMonth, dayIndex);
-    
+
         // Affiche les événements pour cette date
         const eventsForDay = events.filter((event) => {
           const eventStartDate = new Date(event.date_deb);
           const eventEndDate = new Date(event.date_fin);
-    
+
           // Récupère la date sans tenir compte de l'heure, des minutes, etc.
           const currentDateWithoutTime = new Date(
             currentDate.getFullYear(),
@@ -119,15 +119,15 @@ export async function showCalendar(
             eventEndDate.getMonth(),
             eventEndDate.getDate()
           );
-    
+
           // Vérifie si la date actuelle est comprise entre la date de début (inclus) et la date de fin de l'événement
           return (
             currentDateWithoutTime.getTime() >=
-              eventStartDateWithoutTime.getTime() &&
+            eventStartDateWithoutTime.getTime() &&
             currentDateWithoutTime.getTime() <= eventEndDateWithoutTime.getTime()
           );
         });
-    
+
         // Remplit la cellule avec le jour s'il est dans le mois
         if (i === 0 && j < startDayOfWeek) {
           // Ajoute des cellules vides pour les jours avant le début du mois
@@ -135,7 +135,7 @@ export async function showCalendar(
         } else if (dayIndex <= daysInMonth) {
           // Ajoute les jours du mois
           calendarCell.textContent = `${dayIndex}`;
-    
+
           // Ajoute la classe "actualDay" si c'est le jour actuel
           if (
             currentDate.getFullYear() === actualYear &&
@@ -150,42 +150,43 @@ export async function showCalendar(
             eventsForDay.forEach((event) => {
               const eventElement = document.createElement("div");
               eventElement.textContent = event.titre;
-      
+
               // Add the click event listener to each eventElement
               eventElement.addEventListener("click", async () => {
-                  // Ouvrir la fenêtre de mise à jour ici
-                  //window.electron.createUpdateWindow();
-                  await showUpdateEvent(event.id);
+                // Ouvrir la fenêtre de mise à jour ici
+                //window.electron.createUpdateWindow();
+                await showUpdateEvent(event.id);
 
-                  // Afficher l'eventId dans le console.log du renderer.ts
-                  console.log("Received eventId in renderer:", event.id);
+                // Afficher l'eventId dans le console.log du renderer.ts
+                console.log("Received eventId in renderer:", event.id);
               });
-      
+
               eventCell.appendChild(eventElement);
             });
           }
-    
+
           dayIndex++;
           rowIsEmpty = false; // La ligne n'est pas vide
         }
-    
+
         calendarCell.appendChild(eventCell);
         calendarRow.appendChild(calendarCell);
       }
-    
+
       // Vérifie si la ligne n'est pas vide avant de l'ajouter
       if (!rowIsEmpty) {
         calendarTable.appendChild(calendarRow);
       }
     }
-    
+
     // Ajoute la table du calendrier au conteneur
     container.appendChild(calendarTable);
 
 
     // Call the refresh function if it's provided
     if (refreshCalendarCallback) {
-      refreshCalendarCallback(container, targetMonth, targetYear);    }
+      refreshCalendarCallback(container, targetMonth, targetYear);
+    }
   } catch (error) {
     console.error(
       "Erreur lors de la récupération des données du calendrier :",
@@ -276,9 +277,9 @@ export function showCreateEvent(
   </div>
 
     <button type="submit">Créer l'événement</button>`
-  ;
+    ;
 
-  
+
   // Ajoute un gestionnaire d'événement pour le formulaire de création d'événement
   eventForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -335,7 +336,7 @@ export function showCreateEvent(
 
       closeWindow();
       reloadWindow();
-    } 
+    }
     catch (error) {
       console.error("Erreur lors de la création de l'événement :", error);
       // Gérer l'erreur de création d'événement
@@ -350,10 +351,10 @@ export function showCreateEvent(
   document.body.appendChild(createEventModal);
 }
 
-export function showUpdateEvent( eventId: number) {
-  try{
+export function showUpdateEvent(eventId: number) {
+  try {
     window.electron.createUpdateWindowEvent(eventId);
-  } catch (err){
+  } catch (err) {
     console.error(err);
   }
 }
@@ -370,8 +371,8 @@ export function showEvent(event: IEvent) {
   basicEventInfo.innerHTML = `
     <h2>${event.titre}</h2>
     <p>Location: ${event.location}</p>
-    <p>Date de début: ${event.date_deb}</p>
-    <p>Date de fin: ${event.date_fin}</p>
+    <p>Date de début: ${formatDate(event.date_deb)}</p>
+    <p>Date de fin: ${formatDate(event.date_fin)}</p>
     <p>Catégorie: ${event.categorie}</p>
     <p>Statut: ${event.statut}</p>
     <p>Transparence: ${event.transparence}</p>
@@ -381,15 +382,15 @@ export function showEvent(event: IEvent) {
 
   // Ajoute un bouton pour ouvrir/fermer le formulaire de modification
   const editButton = document.createElement("button");
-  editButton.textContent = "Modifier l'événement";
+  editButton.textContent = isFormOpen ? "Annuler" : "Modifier l'événement";
   editButton.addEventListener("click", () => toggleUpdateEventForm(event));
   showEventContainer.appendChild(editButton);
 
   // Ajoute un bouton pour supprimer l'événement
   const deleteButton = document.createElement("button");
   deleteButton.textContent = "Supprimer l'événement";
-  deleteButton.addEventListener("click", () => 
-    {window.electron.deleteEvent(event.id);
+  deleteButton.addEventListener("click", () => {
+    window.electron.deleteEvent(event.id);
     window.electron.reloadWindow();
     window.electron.closeUpdateWindow();
   });
@@ -405,14 +406,13 @@ export function showEvent(event: IEvent) {
   document.body.appendChild(showEventContainer);
 }
 
-
 export function updateEventForm(event: IEvent) {
   const updateEventModal = document.createElement("div");
   updateEventModal.classList.add("update-event-modal");
 
   // Crée le formulaire de modification d'événement
   const updateEventForm = document.createElement("form");
-  updateEventForm.innerHTML =  `
+  updateEventForm.innerHTML = `
     <div class="event-card">
       <div class="event-card-element">
         <label for="event-titre">Titre:</label>
@@ -468,14 +468,13 @@ export function updateEventForm(event: IEvent) {
 
   // Ajoute la fenêtre modale de modification à la page principale
   document.body.appendChild(updateEventModal);
-  let nbMajUp:number
-  nbMajUp = event.nbMaj+1
+  let nbMajUp: number
+  nbMajUp = event.nbMaj + 1
   let eventId: number
   eventId = event.id
   // Handle form submission here
   updateEventForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-
 
     const updatedEvent: IEvent = {
       titre: (updateEventForm.querySelector("#event-titre") as HTMLInputElement).value,
@@ -520,6 +519,11 @@ function toggleUpdateEventForm(event: IEvent) {
 
     // Réinitialise l'état du formulaire
     isFormOpen = false;
+  }
+  // Mettez à jour le texte du bouton en fonction de l'état du formulaire
+  const editButton = document.querySelector(".show-event-container button");
+  if (editButton) {
+    editButton.textContent = isFormOpen ? "Annuler" : "Modifier l'événement";
   }
 }
 

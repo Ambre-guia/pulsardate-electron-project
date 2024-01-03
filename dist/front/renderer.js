@@ -10,9 +10,7 @@ const closeWindow = window.electron.closeWindow;
 const reloadWindow = window.electron.reloadWindow;
 // Declare the refresh function outside the if block
 const refreshCalendar = async (container, month, year) => {
-    console.log('Refreshing calendar with:', month, year);
     await showCalendar(container, month, year);
-    console.log('Calendar refreshed.');
 };
 (async () => {
     try {

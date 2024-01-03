@@ -269,8 +269,8 @@ export function showEvent(event) {
     basicEventInfo.innerHTML = `
     <h2>${event.titre}</h2>
     <p>Location: ${event.location}</p>
-    <p>Date de début: ${event.date_deb}</p>
-    <p>Date de fin: ${event.date_fin}</p>
+    <p>Date de début: ${formatDate(event.date_deb)}</p>
+    <p>Date de fin: ${formatDate(event.date_fin)}</p>
     <p>Catégorie: ${event.categorie}</p>
     <p>Statut: ${event.statut}</p>
     <p>Transparence: ${event.transparence}</p>
@@ -279,7 +279,7 @@ export function showEvent(event) {
     showEventContainer.appendChild(basicEventInfo);
     // Ajoute un bouton pour ouvrir/fermer le formulaire de modification
     const editButton = document.createElement("button");
-    editButton.textContent = "Modifier l'événement";
+    editButton.textContent = isFormOpen ? "Annuler" : "Modifier l'événement";
     editButton.addEventListener("click", () => toggleUpdateEventForm(event));
     showEventContainer.appendChild(editButton);
     // Ajoute un bouton pour supprimer l'événement
@@ -403,6 +403,11 @@ function toggleUpdateEventForm(event) {
         closeUpdateEventForm(currentUpdateEventModal);
         // Réinitialise l'état du formulaire
         isFormOpen = false;
+    }
+    // Mettez à jour le texte du bouton en fonction de l'état du formulaire
+    const editButton = document.querySelector(".show-event-container button");
+    if (editButton) {
+        editButton.textContent = isFormOpen ? "Annuler" : "Modifier l'événement";
     }
 }
 function closeUpdateEventForm(updateEventModal) {
