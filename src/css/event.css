@@ -5,12 +5,34 @@ body {
 }
 
 .event-card {
-  padding: 0.5em 1em;
+  padding: 1.5em 3em;
   margin: 1em 0;
-  border-radius: 50px;
+  border-radius: 15px;
   box-shadow: 20px 20px 60px #0000002e;
 }
 
-.event-card .event-card-element{
+.event-card input:not([type="submit"]):not([type="button"]):not([type="reset"]),
+textarea,
+select {
+  border: 0;
+  background-color: #0000002e;
+  border-bottom: 1px solid darkgray;
+  color: lightgrey;
+}
+select option {
+  margin: 40px;
+  background: rgba(0, 0, 0, 0.3);
+  color: lightgrey;
+  border-radius: 0 0 5px;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+}
+.event-card input:not([type="submit"]):not([type="button"]):not([type="reset"]),
+select {
+  margin-bottom: 1em;
+  margin-left: 2em;
+}
 
+.event-card #event-description {
+  width: 100%;
+  resize: vertical;
 }
