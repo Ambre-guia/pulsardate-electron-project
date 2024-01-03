@@ -69,11 +69,11 @@ electron_1.ipcMain.handle("open-update-event-window", (event, eventId) => {
 function createWindow() {
     // Create the browser window.
     const mainWindow = new electron_1.BrowserWindow({
-        height: 600,
+        height: 800,
         webPreferences: {
             preload: path.join(__dirname, "./preload.js"),
         },
-        width: 800,
+        width: 1000,
     });
     // and load the index.html of the app.
     mainWindow.loadFile(path.join(__dirname, "../../index.html"));
@@ -86,8 +86,8 @@ function createWindow() {
 function createWindowEvent() {
     // Create the event window.
     const eventWindow = new electron_1.BrowserWindow({
-        height: 600,
-        width: 800,
+        height: 800,
+        width: 1000,
         webPreferences: {
             preload: path.join(__dirname, "./preload.js"),
         },
@@ -104,8 +104,8 @@ function createWindowEvent() {
 }
 function createUpdateWindowEvent(eventId) {
     const updateEventWindow = new electron_1.BrowserWindow({
-        height: 600,
-        width: 800,
+        height: 800,
+        width: 1000,
         webPreferences: {
             preload: path.join(__dirname, "./preload.js"),
         },

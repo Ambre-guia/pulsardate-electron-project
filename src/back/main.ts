@@ -89,11 +89,11 @@ ipcMain.handle("open-update-event-window", (event, eventId) => {
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    height: 600,
+    height: 800,
     webPreferences: {
       preload: path.join(__dirname, "./preload.js"),
     },
-    width: 800,
+    width: 1000,
   });
 
   // and load the index.html of the app.
@@ -109,8 +109,8 @@ function createWindow() {
 function createWindowEvent() {
   // Create the event window.
   const eventWindow = new BrowserWindow({
-    height: 600,
-    width: 800,
+    height: 800,
+    width: 1000,
     webPreferences: {
       preload: path.join(__dirname, "./preload.js"),
     },
@@ -132,8 +132,8 @@ function createWindowEvent() {
 
 function createUpdateWindowEvent(eventId: number) {
   const updateEventWindow = new BrowserWindow({
-    height: 600,
-    width: 800,
+    height: 800,
+    width: 1000,
     webPreferences: {
       preload: path.join(__dirname, "./preload.js"),
     },

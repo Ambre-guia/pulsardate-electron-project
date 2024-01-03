@@ -215,6 +215,10 @@ export function showCreateEvent(container, targetMonth, targetYear, refreshCalen
         const eventStatut = eventForm.querySelector("#event-statut").value;
         const eventDescription = eventForm.querySelector("#event-description").value;
         const eventTransparence = eventForm.querySelector("#event-transparence").value;
+        if (new Date(eventDateFin) <= new Date(eventDateDeb)) {
+            alert("La date de fin doit être ultérieure à la date de début.");
+            return;
+        }
         // Définit nbMaj à 1
         const eventNbMaj = 1;
         // Crée un objet IEvent avec les valeurs récupérées
@@ -314,11 +318,11 @@ export function updateEventForm(event) {
     <div class="event-card">
       <div class="event-card-element">
         <label for="event-date-deb">Date de début:</label>
-        <input type="date" id="event-date-deb" name="event-date-deb" value="${event.date_deb}" required>
+        <input type="date" id="event-date-deb" name="event-date-deb" value="${formatDate(event.date_deb)}" required>
       </div>
       <div class="event-card-element">
         <label for="event-date-fin">Date de fin:</label>
-        <input type="date" id="event-date-fin" name="event-date-fin" value="${event.date_fin}" required>
+        <input type="date" id="event-date-fin" name="event-date-fin" value="${formatDate(event.date_fin)}" required>
       </div>
     </div>
 
@@ -408,4 +412,11 @@ function closeUpdateEventForm(updateEventModal) {
     }
     // Met à jour l'état du formulaire
     isFormOpen = false;
+}
+// Mettez à jour la fonction formatDate comme suit (vous pouvez utiliser votre propre logique de formatage) :
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
