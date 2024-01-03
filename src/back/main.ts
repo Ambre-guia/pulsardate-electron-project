@@ -130,7 +130,7 @@ function createWindowEvent() {
   return eventWindow;
 }
 
-function createUpdateWindowEvent(eventId: number){
+function createUpdateWindowEvent(eventId: number) {
   const updateEventWindow = new BrowserWindow({
     height: 600,
     width: 800,
@@ -145,28 +145,33 @@ function createUpdateWindowEvent(eventId: number){
   // Ouvre les DevTools (facultatif)
   updateEventWindow.webContents.openDevTools();
 
-  // Gère le message pour recharger la page avec l'eventId
-  ipcMain.on("reload-update-event-window", (event, eventId) => {
-    updateEventWindow.reload()
+  const reloadHandler = (event: Electron.IpcMainEvent, eventId: number) => {
+    updateEventWindow.reload();
     getEventById(eventId).then((event) => {
-      setTimeout(()=>{
-       updateEventWindow.webContents.send("event-update-event-window", event)
-      },200)
-     })
-  });
+      setTimeout(() => {
+        updateEventWindow.webContents.send("event-update-event-window", event);
+      }, 200);
+    });
+  };
+
+  // Gère le message pour recharger la page avec l'eventId
+  ipcMain.on("reload-update-event-window", reloadHandler);
 
   getEventById(eventId).then((event) => {
-   setTimeout(()=>{
-    updateEventWindow.webContents.send("event-update-event-window", event)
-   },200)
-  })
+    setTimeout(() => {
+      updateEventWindow.webContents.send("event-update-event-window", event);
+    }, 200);
+  });
+
   // Gère le message pour fermer la fenêtre de mise à jour de l'événement
-  ipcMain.on('close-update-event-window', () => {
+  ipcMain.once('close-update-event-window', () => {
+    ipcMain.removeListener("reload-update-event-window", reloadHandler);
     updateEventWindow.close();
   });
 
   return updateEventWindow;
 }
+
 // Générer un menu pour l'application
 const menuTemplate = [
   {

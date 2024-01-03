@@ -114,22 +114,24 @@ function createUpdateWindowEvent(eventId) {
     updateEventWindow.loadFile(path.join(__dirname, "../../update-event.html"));
     // Ouvre les DevTools (facultatif)
     updateEventWindow.webContents.openDevTools();
-    // Gère le message pour recharger la page avec l'eventId
-    electron_1.ipcMain.on("reload-update-event-window", (event, eventId) => {
+    const reloadHandler = (event, eventId) => {
         updateEventWindow.reload();
         (0, event_js_1.getEventById)(eventId).then((event) => {
             setTimeout(() => {
                 updateEventWindow.webContents.send("event-update-event-window", event);
             }, 200);
         });
-    });
+    };
+    // Gère le message pour recharger la page avec l'eventId
+    electron_1.ipcMain.on("reload-update-event-window", reloadHandler);
     (0, event_js_1.getEventById)(eventId).then((event) => {
         setTimeout(() => {
             updateEventWindow.webContents.send("event-update-event-window", event);
         }, 200);
     });
     // Gère le message pour fermer la fenêtre de mise à jour de l'événement
-    electron_1.ipcMain.on('close-update-event-window', () => {
+    electron_1.ipcMain.once('close-update-event-window', () => {
+        electron_1.ipcMain.removeListener("reload-update-event-window", reloadHandler);
         updateEventWindow.close();
     });
     return updateEventWindow;

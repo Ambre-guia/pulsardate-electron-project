@@ -381,6 +381,16 @@ export function showEvent(event: IEvent) {
   editButton.addEventListener("click", () => toggleUpdateEventForm(event));
   showEventContainer.appendChild(editButton);
 
+  // Ajoute un bouton pour supprimer l'événement
+  const deleteButton = document.createElement("button");
+  deleteButton.textContent = "Supprimer l'événement";
+  deleteButton.addEventListener("click", () => 
+    {window.electron.deleteEvent(event.id);
+    window.electron.reloadWindow();
+    window.electron.closeUpdateWindow();
+  });
+  showEventContainer.appendChild(deleteButton);
+
   // Ajoute un bouton pour fermer la fenêtre
   const closeButton = document.createElement("button");
   closeButton.textContent = "Fermer la fenêtre";
@@ -446,7 +456,7 @@ export function updateEventForm(event: IEvent) {
       <textarea id="event-description" placeholder="Description" name="event-description" required>${event.description}</textarea>
     </div>
 
-    <button type="submit">Modifier l'événement</button>
+    <button type="submit">Appliquer la modification</button>
   `;
 
   // Ajoute le formulaire à la fenêtre modale de modification
@@ -502,9 +512,13 @@ function toggleUpdateEventForm(event: IEvent) {
     isFormOpen = true;
   } else {
     // Ferme le formulaire s'il est déjà ouvert
-    closeUpdateEventForm();
+    closeUpdateEventForm(currentUpdateEventModal);
+
+    // Réinitialise l'état du formulaire
+    isFormOpen = false;
   }
 }
+
 
 function closeUpdateEventForm(updateEventModal?: HTMLDivElement) {
   // Supprime la fenêtre modale de modification de la page

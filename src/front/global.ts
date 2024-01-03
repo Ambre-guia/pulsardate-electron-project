@@ -13,6 +13,7 @@ declare global {
       closeWindow: () => void; 
       closeUpdateWindow: () => void;
       reloadWindow: () => void;
+      deleteEvent: (eventId:number)=> void;
       reloadUpdateWindow: (eventId: number) => Promise<any>;
       getEventById: (eventId: number) => Promise<any>;
       createUpdateWindowEvent:(eventId: number) => Promise<any>;
