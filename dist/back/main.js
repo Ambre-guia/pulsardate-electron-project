@@ -121,29 +121,33 @@ function createUpdateWindowEvent(eventId) {
             preload: path.join(__dirname, "./preload.js"),
         },
     });
+    // Define the reload handler function
+    const reloadHandler = (event, eventId) => {
+        if (!updateEventWindow.isDestroyed()) {
+            updateEventWindow.reload();
+        }
+    };
     // Charge le fichier event.html
     updateEventWindow.loadFile(path.join(__dirname, "../../update-event.html"));
     // Ouvre les DevTools (facultatif)
     updateEventWindow.webContents.openDevTools();
-    const reloadHandler = (event, eventId) => {
-        updateEventWindow.reload();
-        (0, event_js_1.getEventById)(eventId).then((event) => {
-            setTimeout(() => {
-                updateEventWindow.webContents.send("event-update-event-window", event);
-            }, 200);
-        });
-    };
     // Gère le message pour recharger la page avec l'eventId
     electron_1.ipcMain.on("reload-update-event-window", reloadHandler);
-    (0, event_js_1.getEventById)(eventId).then((event) => {
-        setTimeout(() => {
-            updateEventWindow.webContents.send("event-update-event-window", event);
-        }, 200);
-    });
     // Gère le message pour fermer la fenêtre de mise à jour de l'événement
-    electron_1.ipcMain.once('close-update-event-window', () => {
+    electron_1.ipcMain.on('close-update-event-window', () => {
         electron_1.ipcMain.removeListener("reload-update-event-window", reloadHandler);
-        updateEventWindow.close();
+        if (!updateEventWindow.isDestroyed()) {
+            updateEventWindow.close();
+        }
+    });
+    // Attach the "dom-ready" event listener
+    updateEventWindow.webContents.on("dom-ready", () => {
+        // Once the DOM is ready, get the event by ID and send it to the renderer process
+        (0, event_js_1.getEventById)(eventId).then((event) => {
+            if (!updateEventWindow.isDestroyed()) {
+                updateEventWindow.webContents.send("event-update-event-window", event);
+            }
+        });
     });
     return updateEventWindow;
 }
@@ -160,9 +164,9 @@ function createImportWindow(event) {
     importWindow.loadFile(path.join(__dirname, "../../import.html"));
     // Open the DevTools (optional).
     importWindow.webContents.openDevTools();
-    setTimeout(() => {
+    importWindow.webContents.on("dom-ready", () => {
         importWindow.webContents.send("import-window", event);
-    }, 200);
+    });
     // Gère le message pour fermer la fenêtre de l'événement
     electron_1.ipcMain.on('close-import-window', () => {
         importWindow.destroy();
@@ -193,8 +197,7 @@ async function handleImportedICS(filePath) {
         const jcalData = ICAL.parse(icsContent);
         const comp = new ICAL.Component(jcalData);
         const importedEvent = extractEventFromComponent(comp);
-        console.log('Imported Event:', importedEvent);
-        await createImportWindow(importedEvent);
+        createImportWindow(importedEvent);
     }
     catch (error) {
         console.error("Error handling imported ICS file:", error);
@@ -231,7 +234,7 @@ function extractEventFromComponent(component) {
 // Générer un menu pour l'application
 const menuTemplate = [
     {
-        label: "Event",
+        label: "Menu",
         submenu: [
             {
                 label: "Creer un event",
@@ -239,13 +242,8 @@ const menuTemplate = [
                     createWindowEvent();
                 },
             },
-        ],
-    },
-    {
-        label: "File",
-        submenu: [
             {
-                label: "Import ICS",
+                label: "Importer un fichier ICS",
                 click: () => {
                     showImportDialog();
                 },
@@ -253,30 +251,18 @@ const menuTemplate = [
         ],
     },
 ];
-// Créer le menu à partir du modèle
 const menu = electron_1.Menu.buildFromTemplate(menuTemplate);
-// Définir le menu de l'application
 electron_1.Menu.setApplicationMenu(menu);
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 electron_1.app.whenReady().then(() => {
     createWindow();
     electron_1.app.on("activate", function () {
-        // On macOS it's common to re-create a window in the app when the
-        // dock icon is clicked and there are no other windows open.
         if (electron_1.BrowserWindow.getAllWindows().length === 0)
             createWindow();
     });
 });
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 electron_1.app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {
         electron_1.app.quit();
     }
 });
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.
 //# sourceMappingURL=main.js.map

@@ -1,13 +1,4 @@
-// This file is required by the index.html file and will
-// be executed in the renderer process for that window.
-// No Node.js APIs are available in this process unless
-// nodeIntegration is set to true in webPreferences.
-// Use preload.js to selectively enable features
-// needed in the renderer process.
 import { showCreateEvent, showCalendar, showEvent, showImport } from "./utils/utils.js";
-// Import the function closeWindow from the preload script
-const closeWindow = window.electron.closeWindow;
-const reloadWindow = window.electron.reloadWindow;
 // Declare the refresh function outside the if block
 const refreshCalendar = async (container, month, year) => {
     await showCalendar(container, month, year);
@@ -23,19 +14,21 @@ const refreshCalendar = async (container, month, year) => {
         const currentDate = new Date();
         const currentMonth = currentDate.getMonth();
         const currentYear = currentDate.getFullYear();
+        // container dans index.html
         if (calendarContainer) {
-            // Call the showCalendar function with the current month and year and pass the refresh function
             await showCalendar(calendarContainer, currentMonth, currentYear, refreshCalendar);
         }
+        // container dans event.html
         if (eventContainer) {
-            // Pass the refresh function to showCreateEvent
-            await showCreateEvent(eventContainer, currentMonth, currentYear, () => refreshCalendar(calendarContainer, currentMonth, currentYear), closeWindow, reloadWindow);
+            showCreateEvent(eventContainer, currentMonth, currentYear);
         }
+        // container dans update-event.html
         if (eventUpdateContainer) {
             window.electron.onUpdateEvent((e, event) => {
                 showEvent(event);
             });
         }
+        // container dans import.html
         if (importContainer) {
             window.electron.onUpdateImport((e, event) => {
                 showImport(event);

@@ -44,19 +44,9 @@ export async function showCalendar(
 
     // Ajouter le header au container
     container.appendChild(calendarHeader);
-    // Obtient le premier et le dernier jour du mois cible
-    const firstDayOfMonth = await window.electron.getFirstDayOfMonth(
-      targetMonth,
-      targetYear
-    );
-    const lastDayOfMonth = await window.electron.getLastDayOfMonth(
-      targetMonth,
-      targetYear
-    );
 
     // Obtient tout les événements
     const events = await window.electron.getAll();
-
 
     // Crée une table pour le calendrier
     const calendarTable = document.createElement("table");
@@ -78,7 +68,6 @@ export async function showCalendar(
 
     // Obtient le jour actuel
     const currentDate = new Date();
-    const currentDay = currentDate.getDate();
 
     const actualDay = currentDate;
     const actualMonth = currentDate.getMonth();
@@ -155,10 +144,7 @@ export async function showCalendar(
               eventElement.addEventListener("click", async () => {
                 // Ouvrir la fenêtre de mise à jour ici
                 //window.electron.createUpdateWindow();
-                await showUpdateEvent(event.id);
-
-                // Afficher l'eventId dans le console.log du renderer.ts
-                console.log("Received eventId in renderer:", event.id);
+                showUpdateEvent(event.id);
               });
 
               eventCell.appendChild(eventElement);
@@ -181,7 +167,6 @@ export async function showCalendar(
 
     // Ajoute la table du calendrier au conteneur
     container.appendChild(calendarTable);
-
 
     // Call the refresh function if it's provided
     if (refreshCalendarCallback) {
@@ -218,9 +203,6 @@ export function showCreateEvent(
   container: HTMLElement,
   targetMonth: number,
   targetYear: number,
-  refreshCalendarCallback?: (container: HTMLElement, month: number, year: number) => void,
-  closeWindow?: () => void,
-  reloadWindow?: () => void
 ) {
   const createEventModal = document.createElement("div");
   createEventModal.classList.add("create-event-modal");
@@ -333,8 +315,8 @@ export function showCreateEvent(
     try {
       await window.electron.createEvent(newEvent);
 
-      closeWindow();
-      reloadWindow();
+      window.electron.closeWindow();
+      window.electron.reloadWindow();
     }
     catch (error) {
       console.error("Erreur lors de la création de l'événement :", error);
@@ -400,39 +382,39 @@ export function showEvent(event: IEvent) {
     window.electron.closeUpdateWindow();
   });
   showEventContainer.appendChild(deleteButton);
-// Ajoute un bouton pour générer un fichier ICS
-   const generateICSButton = document.createElement("button");
-   generateICSButton.textContent = "Générer ICS";
-   generateICSButton.classList.add("btn");
-   generateICSButton.classList.add("btn-3");
-   generateICSButton.addEventListener("click", () => {
-     const icsContent = generateICS(event);
- 
-     // Générez un nom de fichier unique 
-     const fileName = `event_${event.id}.ics`;
- 
-     // Crée un objet Blob avec le contenu ICS et le type MIME approprié
-     const blob = new Blob([icsContent], { type: "text/calendar" });
- 
-     // Crée un objet URL à partir du Blob
-     const url = URL.createObjectURL(blob);
- 
-     // Crée un lien pour télécharger le fichier
-     const link = document.createElement("a");
-     link.href = url;
-     link.download = fileName;
- 
-     // Ajoute le lien à la page et déclenche le clic pour démarrer le téléchargement
-     document.body.appendChild(link);
-     link.click();
- 
-     // Nettoie l'URL de l'objet Blob après le téléchargement
-     URL.revokeObjectURL(url);
- 
-     // Supprime le lien du corps de la page
-     document.body.removeChild(link);
-   });
-   showEventContainer.appendChild(generateICSButton);
+  // Ajoute un bouton pour générer un fichier ICS
+  const generateICSButton = document.createElement("button");
+  generateICSButton.textContent = "Générer ICS";
+  generateICSButton.classList.add("btn");
+  generateICSButton.classList.add("btn-3");
+  generateICSButton.addEventListener("click", () => {
+    const icsContent = generateICS(event);
+
+    // Générez un nom de fichier unique 
+    const fileName = `event_${event.id}.ics`;
+
+    // Crée un objet Blob avec le contenu ICS et le type MIME approprié
+    const blob = new Blob([icsContent], { type: "text/calendar" });
+
+    // Crée un objet URL à partir du Blob
+    const url = URL.createObjectURL(blob);
+
+    // Crée un lien pour télécharger le fichier
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+
+    // Ajoute le lien à la page et déclenche le clic pour démarrer le téléchargement
+    document.body.appendChild(link);
+    link.click();
+
+    // Nettoie l'URL de l'objet Blob après le téléchargement
+    URL.revokeObjectURL(url);
+
+    // Supprime le lien du corps de la page
+    document.body.removeChild(link);
+  });
+  showEventContainer.appendChild(generateICSButton);
   // Ajoute un bouton pour fermer la fenêtre
   const closeButton = document.createElement("button");
   closeButton.classList.add("btn");
@@ -455,70 +437,61 @@ export function updateEventForm(event: IEvent) {
     <div class="event-card">
       <div class="event-card-element">
         <label for="event-titre">Titre:</label>
-        <input type="text" id="event-titre" name="event-titre" value="${
-          event.titre
-        }" required>
+        <input type="text" id="event-titre" name="event-titre" value="${event.titre
+    }" required>
       </div>
       <div class="event-card-element">
         <label for="event-location">Location:</label>
-        <input type="text" id="event-location" name="event-location" value="${
-          event.location
-        }" required>
+        <input type="text" id="event-location" name="event-location" value="${event.location
+    }" required>
       </div>
     </div>
     <div class="event-card">
       <div class="event-card-element">
         <label for="event-date-deb">Date de début:</label>
         <input type="datetime-local" id="event-date-deb" name="event-date-deb" value="${formatDate(
-          event.date_deb
-        )}" required>
+      event.date_deb
+    )}" required>
       </div>
       <div class="event-card-element">
         <label for="event-date-fin">Date de fin:</label>
         <input type="datetime-local" id="event-date-fin" name="event-date-fin" value="${formatDate(
-          event.date_fin
-        )}" required>
+      event.date_fin
+    )}" required>
       </div>
     </div>
 
     <div class="event-card">
       <label for="event-categorie">Catégorie:</label>
-      <input type="text" id="event-categorie" name="event-categorie" value="${
-        event.categorie
-      }" required>
+      <input type="text" id="event-categorie" name="event-categorie" value="${event.categorie
+    }" required>
     </div>
 
     <div class="event-card">
       <label for="event-statut">Statut:</label>
       <select id="event-statut" name="event-statut" required>
-        <option value="TENTATIVE" ${
-          event.statut === "TENTATIVE" ? "selected" : ""
-        }>Tentative</option>
-        <option value="CONFIRMED" ${
-          event.statut === "CONFIRMED" ? "selected" : ""
-        }>Confirmé</option>
-        <option value="CANCELED" ${
-          event.statut === "CANCELED" ? "selected" : ""
-        }>Annulé</option>
+        <option value="TENTATIVE" ${event.statut === "TENTATIVE" ? "selected" : ""
+    }>Tentative</option>
+        <option value="CONFIRMED" ${event.statut === "CONFIRMED" ? "selected" : ""
+    }>Confirmé</option>
+        <option value="CANCELED" ${event.statut === "CANCELED" ? "selected" : ""
+    }>Annulé</option>
       </select>
     </div>
     
     <div class="event-card">
       <label for="event-transparence">Transparence:</label>
       <select id="event-transparence" name="event-transparence" required>
-        <option value="OPAQUE" ${
-          event.transparence === "OPAQUE" ? "selected" : ""
-        }>Opaque</option>
-        <option value="TRANSPARENT" ${
-          event.transparence === "TRANSPARENT" ? "selected" : ""
-        }>Transparent</option>
+        <option value="OPAQUE" ${event.transparence === "OPAQUE" ? "selected" : ""
+    }>Opaque</option>
+        <option value="TRANSPARENT" ${event.transparence === "TRANSPARENT" ? "selected" : ""
+    }>Transparent</option>
       </select>
     </div>
 
     <div class="event-card">
-      <textarea id="event-description" placeholder="Description" name="event-description" required>${
-        event.description
-      }</textarea>
+      <textarea id="event-description" placeholder="Description" name="event-description" required>${event.description
+    }</textarea>
     </div>
 
     <button class="btn btn-1 btn-rad" type="submit">Appliquer la modification</button>
@@ -555,7 +528,7 @@ export function updateEventForm(event: IEvent) {
 
       await window.electron.reloadUpdateWindow(eventId);
 
-      await window.electron.reloadWindow();
+      window.electron.reloadWindow();
       // Close the update event modal
       closeUpdateEventForm(updateEventModal);
     } catch (error) {
@@ -572,16 +545,13 @@ function toggleUpdateEventForm(event: IEvent) {
   if (!isFormOpen) {
     currentUpdateEventModal = updateEventForm(event);
 
-    // Mettez à jour l'état du formulaire
     isFormOpen = true;
   } else {
-    // Ferme le formulaire s'il est déjà ouvert
     closeUpdateEventForm(currentUpdateEventModal);
 
-    // Réinitialise l'état du formulaire
     isFormOpen = false;
   }
-  // Mettez à jour le texte du bouton en fonction de l'état du formulaire
+
   const editButton = document.querySelector(".show-event-container button");
   if (editButton) {
     editButton.textContent = isFormOpen ? "Annuler" : "Modifier l'événement";
@@ -620,14 +590,13 @@ export function generateICS(event: IEvent) {
   lignesICS.push(`LOCATION:${event.location}`);
   lignesICS.push(`DTSTART:${formatDateForICS(event.date_deb)}`);
   lignesICS.push(`DTEND:${formatDateForICS(event.date_fin)}`);
-  lignesICS.push(`CATEGORIES:${event.categorie}`);  
-  lignesICS.push(`STATUS:${event.statut}`); 
-  lignesICS.push(`TRANSP:${event.transparence}`);  
+  lignesICS.push(`CATEGORIES:${event.categorie}`);
+  lignesICS.push(`STATUS:${event.statut}`);
+  lignesICS.push(`TRANSP:${event.transparence}`);
   lignesICS.push('END:VEVENT');
   lignesICS.push('END:VCALENDAR');
 
   const icsContent = lignesICS.join('\r\n');
-  console.log('Generated ICS Content:', icsContent);
 
   return icsContent;
 }
@@ -652,73 +621,66 @@ export function showImport(event: IEvent) {
     <div class="event-card">
       <div class="event-card-element">
         <label for="event-titre">Titre:</label>
-        <input type="text" id="event-titre" name="event-titre" value="${
-          event.titre
-        }" required>
+        <input type="text" id="event-titre" name="event-titre" value="${event.titre
+    }" required>
       </div>
       <div class="event-card-element">
         <label for="event-location">Location:</label>
-        <input type="text" id="event-location" name="event-location" value="${
-          event.location
-        }" required>
+        <input type="text" id="event-location" name="event-location" value="${event.location
+    }" required>
       </div>
     </div>
     <div class="event-card">
       <div class="event-card-element">
         <label for="event-date-deb">Date de début:</label>
         <input type="datetime-local" id="event-date-deb" name="event-date-deb" value="${formatDate(
-          event.date_deb
-        )}" required>
+      event.date_deb
+    )}" required>
       </div>
       <div class="event-card-element">
         <label for="event-date-fin">Date de fin:</label>
         <input type="datetime-local" id="event-date-fin" name="event-date-fin" value="${formatDate(
-          event.date_fin
-        )}" required>
+      event.date_fin
+    )}" required>
       </div>
     </div>
 
     <div class="event-card">
       <label for="event-categorie">Catégorie:</label>
-      <input type="text" id="event-categorie" name="event-categorie" value="${
-        event.categorie
-      }" required>
+      <input type="text" id="event-categorie" name="event-categorie" value="${event.categorie
+    }" required>
     </div>
 
     <div class="event-card">
       <label for="event-statut">Statut:</label>
       <select id="event-statut" name="event-statut" required>
-        <option value="TENTATIVE" ${
-          event.statut === "TENTATIVE" ? "selected" : ""
-        }>Tentative</option>
-        <option value="CONFIRMED" ${
-          event.statut === "CONFIRMED" ? "selected" : ""
-        }>Confirmé</option>
-        <option value="CANCELED" ${
-          event.statut === "CANCELED" ? "selected" : ""
-        }>Annulé</option>
+        <option value="TENTATIVE" ${event.statut === "TENTATIVE" ? "selected" : ""
+    }>Tentative</option>
+        <option value="CONFIRMED" ${event.statut === "CONFIRMED" ? "selected" : ""
+    }>Confirmé</option>
+        <option value="CANCELED" ${event.statut === "CANCELED" ? "selected" : ""
+    }>Annulé</option>
       </select>
     </div>
     
     <div class="event-card">
       <label for="event-transparence">Transparence:</label>
       <select id="event-transparence" name="event-transparence" required>
-        <option value="OPAQUE" ${
-          event.transparence === "OPAQUE" ? "selected" : ""
-        }>Opaque</option>
-        <option value="TRANSPARENT" ${
-          event.transparence === "TRANSPARENT" ? "selected" : ""
-        }>Transparent</option>
+        <option value="OPAQUE" ${event.transparence === "OPAQUE" ? "selected" : ""
+    }>Opaque</option>
+        <option value="TRANSPARENT" ${event.transparence === "TRANSPARENT" ? "selected" : ""
+    }>Transparent</option>
       </select>
     </div>
 
     <div class="event-card">
-      <textarea id="event-description" placeholder="Description" name="event-description" required>${
-        event.description
-      }</textarea>
+      <textarea id="event-description" placeholder="Description" name="event-description" required>${event.description
+    }</textarea>
     </div>
 
     <button class="btn btn-1 btn-rad" type="submit">Appliquer la modification</button>
+
+    <button class="btn btn-2 btn-rad" type="button" id="cancel-import">Annuler l'import</button>
   `;
 
   // Add the form to the import modal
@@ -729,6 +691,12 @@ export function showImport(event: IEvent) {
 
   let nbMajUp: number;
   nbMajUp = event.nbMaj + 1;
+
+  // Gestionnaire d'événement pour le bouton Annuler l'import
+  const cancelButton = importForm.querySelector("#cancel-import");
+  cancelButton?.addEventListener("click", () => {
+    window.electron.closeImportWindow();
+  });
 
   importForm.addEventListener('submit', async (event) => {
     event.preventDefault();

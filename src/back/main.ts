@@ -15,6 +15,7 @@ import {
 } from "./inc/date.js";
 import { IEvent } from "../interfaces/event.js";
 const ICAL = require("ical.js");
+
 // Handle to get all events
 ipcMain.handle("get-events", async (event) => await getAll());
 
@@ -77,7 +78,7 @@ ipcMain.handle("get-last-day-of-month", async (event, month, year) =>
 ipcMain.handle("open-event-window", () => createWindowEvent());
 
 ipcMain.handle("open-update-event-window", (event, eventId) => {
-  try {   
+  try {
     createUpdateWindowEvent(eventId);
     return true;
   } catch (error) {
@@ -87,7 +88,7 @@ ipcMain.handle("open-update-event-window", (event, eventId) => {
 });
 
 ipcMain.handle("open-import-window", (event, events) => {
-  try {   
+  try {
     createImportWindow(events);
     return true;
   } catch (error) {
@@ -126,7 +127,7 @@ function createWindowEvent() {
     },
   });
 
-    // Load the event.html file.
+  // Load the event.html file.
   eventWindow.loadFile(path.join(__dirname, "../../event.html"));
 
   // Open the DevTools (optional).
@@ -149,34 +150,39 @@ function createUpdateWindowEvent(eventId: number) {
     },
   });
 
+  // Define the reload handler function
+  const reloadHandler = (event: Electron.IpcMainEvent, eventId: number) => {
+    if (!updateEventWindow.isDestroyed()) {
+      updateEventWindow.reload();
+    }
+  };
+
   // Charge le fichier event.html
   updateEventWindow.loadFile(path.join(__dirname, "../../update-event.html"));
 
   // Ouvre les DevTools (facultatif)
   updateEventWindow.webContents.openDevTools();
 
-  const reloadHandler = (event: Electron.IpcMainEvent, eventId: number) => {
-    updateEventWindow.reload();
-    getEventById(eventId).then((event) => {
-      setTimeout(() => {
-        updateEventWindow.webContents.send("event-update-event-window", event);
-      }, 200);
-    });
-  };
-
   // Gère le message pour recharger la page avec l'eventId
   ipcMain.on("reload-update-event-window", reloadHandler);
 
-  getEventById(eventId).then((event) => {
-    setTimeout(() => {
-      updateEventWindow.webContents.send("event-update-event-window", event);
-    }, 200);
+  // Gère le message pour fermer la fenêtre de mise à jour de l'événement
+  ipcMain.on('close-update-event-window', () => {
+    ipcMain.removeListener("reload-update-event-window", reloadHandler);
+
+    if (!updateEventWindow.isDestroyed()) {
+      updateEventWindow.close();
+    }
   });
 
-  // Gère le message pour fermer la fenêtre de mise à jour de l'événement
-  ipcMain.once('close-update-event-window', () => {
-    ipcMain.removeListener("reload-update-event-window", reloadHandler);
-    updateEventWindow.close();
+  // Attach the "dom-ready" event listener
+  updateEventWindow.webContents.on("dom-ready", () => {
+    // Once the DOM is ready, get the event by ID and send it to the renderer process
+    getEventById(eventId).then((event) => {
+      if (!updateEventWindow.isDestroyed()) {
+        updateEventWindow.webContents.send("event-update-event-window", event);
+      }
+    });
   });
 
   return updateEventWindow;
@@ -192,15 +198,15 @@ function createImportWindow(event: IEvent) {
     },
   });
 
-    // Load the event.html file.
+  // Load the event.html file.
   importWindow.loadFile(path.join(__dirname, "../../import.html"));
 
   // Open the DevTools (optional).
   importWindow.webContents.openDevTools();
-  
-  setTimeout(() => {
+
+  importWindow.webContents.on("dom-ready", () => {
     importWindow.webContents.send("import-window", event);
-  }, 200);
+  });
 
   // Gère le message pour fermer la fenêtre de l'événement
   ipcMain.on('close-import-window', () => {
@@ -222,7 +228,7 @@ function showImportDialog() {
   }).then((result) => {
     if (!result.canceled && result.filePaths.length > 0) {
       const filePath = result.filePaths[0];
-      
+
       handleImportedICS(filePath);
     }
   }).catch((err) => {
@@ -239,9 +245,8 @@ export async function handleImportedICS(filePath: string) {
     const comp = new ICAL.Component(jcalData);
 
     const importedEvent = extractEventFromComponent(comp);
-    console.log('Imported Event:', importedEvent);
 
-    await createImportWindow(importedEvent)
+    createImportWindow(importedEvent)
 
   } catch (error) {
     console.error("Error handling imported ICS file:", error);
@@ -258,7 +263,7 @@ function extractEventFromComponent(component: any): IEvent | null {
   }
 
   const vcalendar = jCal[2];
-  
+
   const vevent = vcalendar.find((item: any) => item[0] === "vevent");
 
   if (!vevent) {
@@ -285,7 +290,7 @@ function extractEventFromComponent(component: any): IEvent | null {
 // Générer un menu pour l'application
 const menuTemplate = [
   {
-    label: "Event",
+    label: "Menu",
     submenu: [
       {
         label: "Creer un event",
@@ -293,13 +298,8 @@ const menuTemplate = [
           createWindowEvent();
         },
       },
-    ],
-  },
-  {
-    label: "File",
-    submenu: [
       {
-        label: "Import ICS",
+        label: "Importer un fichier ICS",
         click: () => {
           showImportDialog();
         },
@@ -308,33 +308,20 @@ const menuTemplate = [
   },
 ];
 
-// Créer le menu à partir du modèle
 const menu = Menu.buildFromTemplate(menuTemplate);
 
-// Définir le menu de l'application
 Menu.setApplicationMenu(menu);
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow();
 
   app.on("activate", function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
   }
 });
-
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.

@@ -31,9 +31,6 @@ export async function showCalendar(container, targetMonth, targetYear, refreshCa
         calendarHeader.appendChild(nextButton);
         // Ajouter le header au container
         container.appendChild(calendarHeader);
-        // Obtient le premier et le dernier jour du mois cible
-        const firstDayOfMonth = await window.electron.getFirstDayOfMonth(targetMonth, targetYear);
-        const lastDayOfMonth = await window.electron.getLastDayOfMonth(targetMonth, targetYear);
         // Obtient tout les événements
         const events = await window.electron.getAll();
         // Crée une table pour le calendrier
@@ -52,7 +49,6 @@ export async function showCalendar(container, targetMonth, targetYear, refreshCa
         const startDayOfWeek = new Date(targetYear, targetMonth, 1).getDay();
         // Obtient le jour actuel
         const currentDate = new Date();
-        const currentDay = currentDate.getDate();
         const actualDay = currentDate;
         const actualMonth = currentDate.getMonth();
         const actualYear = currentDate.getFullYear();
@@ -104,8 +100,6 @@ export async function showCalendar(container, targetMonth, targetYear, refreshCa
                                 // Ouvrir la fenêtre de mise à jour ici
                                 //window.electron.createUpdateWindow();
                                 await showUpdateEvent(event.id);
-                                // Afficher l'eventId dans le console.log du renderer.ts
-                                console.log("Received eventId in renderer:", event.id);
                             });
                             eventCell.appendChild(eventElement);
                         });
@@ -149,7 +143,7 @@ function getMonthName(monthNumber) {
     ];
     return months[monthNumber];
 }
-export function showCreateEvent(container, targetMonth, targetYear, refreshCalendarCallback, closeWindow, reloadWindow) {
+export function showCreateEvent(container, targetMonth, targetYear) {
     const createEventModal = document.createElement("div");
     createEventModal.classList.add("create-event-modal");
     // Crée le formulaire de création d'événement
@@ -236,8 +230,8 @@ export function showCreateEvent(container, targetMonth, targetYear, refreshCalen
         // Vous pouvez envoyer cet objet à votre backend via IPC pour créer l'événement
         try {
             await window.electron.createEvent(newEvent);
-            closeWindow();
-            reloadWindow();
+            window.electron.closeWindow();
+            window.electron.reloadWindow();
         }
         catch (error) {
             console.error("Erreur lors de la création de l'événement :", error);
@@ -478,7 +472,6 @@ export function generateICS(event) {
     lignesICS.push('END:VEVENT');
     lignesICS.push('END:VCALENDAR');
     const icsContent = lignesICS.join('\r\n');
-    console.log('Generated ICS Content:', icsContent);
     return icsContent;
 }
 function formatDateForICS(date) {
@@ -543,6 +536,8 @@ export function showImport(event) {
     </div>
 
     <button class="btn btn-1 btn-rad" type="submit">Appliquer la modification</button>
+
+    <button class="btn btn-2 btn-rad" type="button" id="cancel-import">Annuler l'import</button>
   `;
     // Add the form to the import modal
     importModal.appendChild(importForm);
@@ -550,6 +545,11 @@ export function showImport(event) {
     document.body.appendChild(importModal);
     let nbMajUp;
     nbMajUp = event.nbMaj + 1;
+    // Gestionnaire d'événement pour le bouton Annuler l'import
+    const cancelButton = importForm.querySelector("#cancel-import");
+    cancelButton?.addEventListener("click", () => {
+        window.electron.closeImportWindow();
+    });
     importForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const importEvent = {
