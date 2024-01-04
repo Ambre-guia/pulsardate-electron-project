@@ -20,7 +20,7 @@ body {
   margin: auto;
   display: flex;
   flex-direction: column;
-  width: 80%;
+  width: 90%;
   justify-content: center;
   align-items: center;
 }
@@ -79,7 +79,6 @@ table {
   box-sizing: border-box;
   border-collapse: collapse;
   table-layout: fixed;
-  width: 100%;
 }
 
 table th {
@@ -102,10 +101,6 @@ table td {
   vertical-align: top;
 }
 .actualDay {
-  width: 27px;
-  height: 27px;
-  line-height: 27px;
-  text-align: center;
   color: rgba(156, 202, 235, 1);
   font-weight: bold;
 }
