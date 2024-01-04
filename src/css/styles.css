@@ -70,19 +70,6 @@ header .title {
   left: 20px;
 }
 
-/*  BUTTONS  */
-.btn {
-  width: 15rem;
-  height: 4rem;
-  border-radius: 1rem;
-  box-shadow: 0.3rem 0.3rem 0.6rem #c8d0e7;
-  justify-self: center;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: 0.3s ease;
-}
-
 /* ======= Table ======= */
 
 table {
@@ -91,6 +78,8 @@ table {
   position: relative;
   box-sizing: border-box;
   border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
 }
 
 table th {
@@ -110,6 +99,7 @@ table td {
   width: 60px;
   padding: 10px;
   text-align: center;
+  vertical-align: top;
 }
 .actualDay {
   width: 27px;
@@ -124,4 +114,17 @@ table td {
   font-size: 14px;
   padding: 1em 0;
   color: lightgrey;
+  text-align: start;
+}
+
+.event :nth-child(odd) {
+  background-color: rgba(92, 233, 53, 0.6);
+  margin: 0.5em 0;
+  border-radius: 5px;
+  padding: 0.5em;
+}
+.event :nth-child(even) {
+  background-color: rgba(84, 232, 222, 0.6);
+  border-radius: 5px;
+  padding: 0.5em;
 }

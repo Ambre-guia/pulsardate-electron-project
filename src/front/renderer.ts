@@ -4,25 +4,25 @@
 // nodeIntegration is set to true in webPreferences.
 // Use preload.js to selectively enable features
 // needed in the renderer process.
-import { showCreateEvent, showCalendar } from "./utils/utils.js";
+import { showCreateEvent, showCalendar, showEvent, showImport } from "./utils/utils.js";
 
 // Import the function closeWindow from the preload script
 const closeWindow = window.electron.closeWindow;
 const reloadWindow = window.electron.reloadWindow;
 
+
 // Declare the refresh function outside the if block
 const refreshCalendar = async (container: HTMLElement, month: number, year: number) => {
-  console.log('Refreshing calendar with:', month, year);
   await showCalendar(container, month, year);
-  console.log('Calendar refreshed.');
 };
-
 
 (async () => {
   try {
     // Assuming you have a DOM element with the id 'calendarContainer' to display the calendar
     const calendarContainer = document.getElementById("tableCalendar");
     const eventContainer = document.getElementById("eventContainer");
+    const eventUpdateContainer = document.getElementById("eventUpdateContainer");
+    const importContainer = document.getElementById("importContainer");
 
     // Get the current month and year outside the if block
     const currentDate = new Date();
@@ -35,11 +35,20 @@ const refreshCalendar = async (container: HTMLElement, month: number, year: numb
     }
 
     if (eventContainer) {
-      const events = await window.electron.getAll();
-      console.log(events);
-
       // Pass the refresh function to showCreateEvent
       await showCreateEvent(eventContainer, currentMonth, currentYear, () => refreshCalendar(calendarContainer, currentMonth, currentYear), closeWindow, reloadWindow);
+    }
+
+    if (eventUpdateContainer) {
+      window.electron.onUpdateEvent((e: any, event: any) => {
+        showEvent(event)
+      });
+    }
+
+    if (importContainer) {
+      window.electron.onUpdateImport((e: any, event: any) => {
+        showImport(event)
+      });
     }
   } catch (err) {
     console.error(err);
