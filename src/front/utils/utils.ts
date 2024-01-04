@@ -386,7 +386,7 @@ export function showEvent(event: IEvent) {
   const generateICSButton = document.createElement("button");
   generateICSButton.textContent = "Générer ICS";
   generateICSButton.classList.add("btn");
-  generateICSButton.classList.add("btn-3");
+  generateICSButton.classList.add("btn-download");
   generateICSButton.addEventListener("click", () => {
     const icsContent = generateICS(event);
 

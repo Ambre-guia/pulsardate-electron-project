@@ -99,7 +99,7 @@ export async function showCalendar(container, targetMonth, targetYear, refreshCa
                             eventElement.addEventListener("click", async () => {
                                 // Ouvrir la fenêtre de mise à jour ici
                                 //window.electron.createUpdateWindow();
-                                await showUpdateEvent(event.id);
+                                showUpdateEvent(event.id);
                             });
                             eventCell.appendChild(eventElement);
                         });
@@ -295,7 +295,7 @@ export function showEvent(event) {
     const generateICSButton = document.createElement("button");
     generateICSButton.textContent = "Générer ICS";
     generateICSButton.classList.add("btn");
-    generateICSButton.classList.add("btn-3");
+    generateICSButton.classList.add("btn-download");
     generateICSButton.addEventListener("click", () => {
         const icsContent = generateICS(event);
         // Générez un nom de fichier unique 
@@ -408,7 +408,7 @@ export function updateEventForm(event) {
             // Update the event using the new values
             await window.electron.updateEvent(eventId, updatedEvent);
             await window.electron.reloadUpdateWindow(eventId);
-            await window.electron.reloadWindow();
+            window.electron.reloadWindow();
             // Close the update event modal
             closeUpdateEventForm(updateEventModal);
         }
@@ -423,16 +423,12 @@ export function updateEventForm(event) {
 function toggleUpdateEventForm(event) {
     if (!isFormOpen) {
         currentUpdateEventModal = updateEventForm(event);
-        // Mettez à jour l'état du formulaire
         isFormOpen = true;
     }
     else {
-        // Ferme le formulaire s'il est déjà ouvert
         closeUpdateEventForm(currentUpdateEventModal);
-        // Réinitialise l'état du formulaire
         isFormOpen = false;
     }
-    // Mettez à jour le texte du bouton en fonction de l'état du formulaire
     const editButton = document.querySelector(".show-event-container button");
     if (editButton) {
         editButton.textContent = isFormOpen ? "Annuler" : "Modifier l'événement";
