@@ -119,3 +119,9 @@ table td {
   color: rgba(156, 202, 235, 1);
   font-weight: bold;
 }
+
+.event {
+  font-size: 14px;
+  padding: 1em 0;
+  color: lightgrey;
+}
