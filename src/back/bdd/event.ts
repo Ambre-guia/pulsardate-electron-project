@@ -31,7 +31,7 @@ export async function getEventById(eventId: number): Promise<IEvent | null> {
         reject(err);
       } else {
         if (result.length === 0) {
-          resolve(null); 
+          resolve(null);
         } else {
           resolve(result[0]);
         }
@@ -47,7 +47,7 @@ export async function updateEvent(eventId: number, updatedEvent: IEvent): Promis
       if (err) {
         reject(err);
       } else {
-        resolve(true); 
+        resolve(true);
       }
     });
   });
@@ -60,7 +60,7 @@ export async function deleteEvent(eventId: number): Promise<boolean> {
       if (err) {
         reject(err);
       } else {
-        resolve(true); 
+        resolve(true);
       }
     });
   });

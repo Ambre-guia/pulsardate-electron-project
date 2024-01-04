@@ -1,11 +1,11 @@
 import { IEvent } from "../interfaces/event";
 
-export {};
+export { };
 
 declare global {
   interface Window {
     electron: {
-      // Fonctions liées aux événements
+      // Functions related to events
       getAll: () => Promise<IEvent[]>;
       createEvent: (event: IEvent) => Promise<number | null>;
       deleteEvent: (eventId: number) => void;
@@ -13,9 +13,9 @@ declare global {
       getEventById: (eventId: number) => Promise<any>;
       onUpdateEvent: (cb: any) => void;
       onUpdateImport: (cb: any) => void;
-      
-      // Fonctions liées aux fenêtres
-      createUpdateWindowEvent:(eventId: number) => Promise<any>;
+
+      // Functions related to windows
+      createUpdateWindowEvent: (eventId: number) => Promise<any>;
       createUpdateWindow: (eventId: number) => Promise<any>;
       createImportWindow: (event: IEvent) => Promise<any>;
       closeWindow: () => void;
@@ -24,15 +24,14 @@ declare global {
       reloadWindow: () => void;
       reloadUpdateWindow: (eventId: number) => Promise<any>;
 
-      // Fonctions liées aux dates
+      // Functions related to dates
       getCurrentMonth: () => Promise<any>;
       getCurrentYear: () => Promise<any>;
       getFirstDayOfMonth: (month: number, year: number) => Promise<any>;
       getLastDayOfMonth: (month: number, year: number) => Promise<any>;
 
-      // Autres fonctions utilitaires
+      // Other utility functions
       generateICS: (event: IEvent) => Promise<any>;
     };
   }
 }
-

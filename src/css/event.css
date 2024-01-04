@@ -19,6 +19,7 @@ select {
   border-bottom: 1px solid darkgray;
   color: lightgrey;
 }
+
 select option {
   margin: 40px;
   background: rgba(0, 0, 0, 0.3);
@@ -26,6 +27,7 @@ select option {
   border-radius: 0 0 5px;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
 }
+
 .event-card input:not([type="submit"]):not([type="button"]):not([type="reset"]),
 select {
   margin-bottom: 1em;
@@ -45,9 +47,11 @@ select {
   letter-spacing: 1px;
   transition: transform 800ms ease-out;
 }
+
 .btn-rad {
   border-radius: 20px;
 }
+
 .btn-1 {
   border: 1px solid #ff4b2b;
   background-color: #ff4b2b;
@@ -58,9 +62,11 @@ select {
   -o-transition: background-color 800ms ease-out;
   transition: background-color 800ms ease-out;
 }
+
 .btn-1:hover {
   background-color: rgba(255, 75, 43, 0.6);
 }
+
 .btn-2 {
   border: 1px solid lightgrey;
   color: lightgrey;
@@ -76,6 +82,7 @@ select {
 .btn-2:hover {
   background-color: rgba(211, 211, 211, 0.5);
 }
+
 .btn-3 {
   color: lightgray;
   background-color: transparent;
@@ -93,6 +100,7 @@ select {
 .btn-3:hover {
   border-bottom: 1px solid lightgrey;
 }
+
 .btn-download {
   display: inline-block;
   position: relative;
@@ -159,6 +167,7 @@ select {
 
 /* keyframes for the download icon anim */
 @keyframes downloadArrow {
+
   /* 0% and 0.001% keyframes used as a hackish way of having the button frozen on a nice looking frame by default */
   0% {
     margin-top: -7px;

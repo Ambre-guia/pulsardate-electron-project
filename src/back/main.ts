@@ -1,4 +1,4 @@
-import { app, ipcMain, BrowserWindow, Menu } from "electron";
+import { app, ipcMain, BrowserWindow, Menu, dialog } from "electron";
 import * as path from "path";
 import {
   getAll,
@@ -16,10 +16,9 @@ import {
 import { IEvent } from "../interfaces/event.js";
 const ICAL = require("ical.js");
 
-// Handle to get all events
+// Event-related handlers
 ipcMain.handle("get-events", async (event) => await getAll());
 
-// Handle to create a new event
 ipcMain.handle("create-event", async (event, newEvent) => {
   try {
     return await createEvent(newEvent);
@@ -29,7 +28,6 @@ ipcMain.handle("create-event", async (event, newEvent) => {
   }
 });
 
-// Handle to get an event by ID
 ipcMain.handle("get-event-by-id", async (event, eventId) => {
   try {
     return await getEventById(eventId);
@@ -39,7 +37,6 @@ ipcMain.handle("get-event-by-id", async (event, eventId) => {
   }
 });
 
-// Handle to update an existing event
 ipcMain.handle("update-event", async (event, eventId, updatedEvent) => {
   try {
     return await updateEvent(eventId, updatedEvent);
@@ -49,7 +46,6 @@ ipcMain.handle("update-event", async (event, eventId, updatedEvent) => {
   }
 });
 
-// Handle to delete an event by ID
 ipcMain.handle("delete-event", async (event, eventId) => {
   try {
     return await deleteEvent(eventId);
@@ -59,22 +55,20 @@ ipcMain.handle("delete-event", async (event, eventId) => {
   }
 });
 
-// Handle to get the current month
+// Date-related handlers
 ipcMain.handle("get-current-month", async (event) => getCurrentMonth());
 
-// Handle to get the current year
 ipcMain.handle("get-current-year", async (event) => getCurrentYear());
 
-// Handle to get the first day of the month
 ipcMain.handle("get-first-day-of-month", async (event, month, year) =>
   getFirstDayOfMonth(month, year)
 );
 
-// Handle to get the last day of the month
 ipcMain.handle("get-last-day-of-month", async (event, month, year) =>
   getLastDayOfMonth(month, year)
 );
 
+// Window-related handlers
 ipcMain.handle("open-event-window", () => createWindowEvent());
 
 ipcMain.handle("open-update-event-window", (event, eventId) => {
@@ -98,7 +92,7 @@ ipcMain.handle("open-import-window", (event, events) => {
 });
 
 function createWindow() {
-  // Create the browser window.
+  // Create the main browser window.
   const mainWindow = new BrowserWindow({
     height: 800,
     webPreferences: {
@@ -107,14 +101,15 @@ function createWindow() {
     width: 1000,
   });
 
-  // and load the index.html of the app.
+  // Load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, "../../index.html"));
 
   ipcMain.on('reload-window', () => {
     mainWindow.reload();
   });
+
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 }
 
 function createWindowEvent() {
@@ -131,9 +126,9 @@ function createWindowEvent() {
   eventWindow.loadFile(path.join(__dirname, "../../event.html"));
 
   // Open the DevTools (optional).
-  eventWindow.webContents.openDevTools();
+  // eventWindow.webContents.openDevTools();
 
-  // Gère le message pour fermer la fenêtre de l'événement
+  // Handle the message to close the event window.
   ipcMain.on('close-event-window', () => {
     eventWindow.destroy();
   });
@@ -150,23 +145,23 @@ function createUpdateWindowEvent(eventId: number) {
     },
   });
 
-  // Define the reload handler function
+  // Define the reload handler function.
   const reloadHandler = (event: Electron.IpcMainEvent, eventId: number) => {
     if (!updateEventWindow.isDestroyed()) {
       updateEventWindow.reload();
     }
   };
 
-  // Charge le fichier event.html
+  // Load the update-event.html file.
   updateEventWindow.loadFile(path.join(__dirname, "../../update-event.html"));
 
-  // Ouvre les DevTools (facultatif)
-  updateEventWindow.webContents.openDevTools();
+  // Open the DevTools (optional).
+  // updateEventWindow.webContents.openDevTools();
 
-  // Gère le message pour recharger la page avec l'eventId
+  // Handle the message to reload the page with the eventId.
   ipcMain.on("reload-update-event-window", reloadHandler);
 
-  // Gère le message pour fermer la fenêtre de mise à jour de l'événement
+  // Handle the message to close the update event window.
   ipcMain.on('close-update-event-window', () => {
     ipcMain.removeListener("reload-update-event-window", reloadHandler);
 
@@ -175,9 +170,9 @@ function createUpdateWindowEvent(eventId: number) {
     }
   });
 
-  // Attach the "dom-ready" event listener
+  // Attach the "dom-ready" event listener.
   updateEventWindow.webContents.on("dom-ready", () => {
-    // Once the DOM is ready, get the event by ID and send it to the renderer process
+    // Once the DOM is ready, get the event by ID and send it to the renderer process.
     getEventById(eventId).then((event) => {
       if (!updateEventWindow.isDestroyed()) {
         updateEventWindow.webContents.send("event-update-event-window", event);
@@ -189,7 +184,7 @@ function createUpdateWindowEvent(eventId: number) {
 }
 
 function createImportWindow(event: IEvent) {
-  // Create the event window.
+  // Create the import window.
   const importWindow = new BrowserWindow({
     height: 800,
     width: 1000,
@@ -198,17 +193,17 @@ function createImportWindow(event: IEvent) {
     },
   });
 
-  // Load the event.html file.
+  // Load the import.html file.
   importWindow.loadFile(path.join(__dirname, "../../import.html"));
 
   // Open the DevTools (optional).
-  importWindow.webContents.openDevTools();
+  // importWindow.webContents.openDevTools();
 
   importWindow.webContents.on("dom-ready", () => {
     importWindow.webContents.send("import-window", event);
   });
 
-  // Gère le message pour fermer la fenêtre de l'événement
+  // Handle the message to close the import window.
   ipcMain.on('close-import-window', () => {
     importWindow.destroy();
   });
@@ -217,8 +212,6 @@ function createImportWindow(event: IEvent) {
 }
 
 function showImportDialog() {
-  const { dialog } = require('electron');
-
   dialog.showOpenDialog({
     properties: ['openFile'],
     filters: [
@@ -235,6 +228,7 @@ function showImportDialog() {
     console.error('Error in showImportDialog:', err);
   });
 }
+
 export async function handleImportedICS(filePath: string) {
   const fs = require("fs").promises;
 
@@ -246,7 +240,7 @@ export async function handleImportedICS(filePath: string) {
 
     const importedEvent = extractEventFromComponent(comp);
 
-    createImportWindow(importedEvent)
+    createImportWindow(importedEvent);
 
   } catch (error) {
     console.error("Error handling imported ICS file:", error);
@@ -287,19 +281,19 @@ function extractEventFromComponent(component: any): IEvent | null {
   return event;
 }
 
-// Générer un menu pour l'application
+// Generate a menu for the application
 const menuTemplate = [
   {
     label: "Menu",
     submenu: [
       {
-        label: "Creer un event",
+        label: "Create an event",
         click: () => {
           createWindowEvent();
         },
       },
       {
-        label: "Importer un fichier ICS",
+        label: "Import an ICS file",
         click: () => {
           showImportDialog();
         },
