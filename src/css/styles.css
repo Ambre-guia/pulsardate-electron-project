@@ -40,6 +40,7 @@ header {
   z-index: 100;
   width: 100%;
 }
+
 header .title {
   margin: 0;
   padding: 0;
@@ -47,6 +48,7 @@ header .title {
   line-height: 50px;
   letter-spacing: 1px;
 }
+
 .left,
 .right {
   position: absolute;
@@ -58,6 +60,7 @@ header .title {
   cursor: pointer;
   background: none;
 }
+
 .right {
   border-width: 7.5px 0 7.5px 10px;
   border-color: transparent transparent transparent rgba(160, 159, 160, 1);
@@ -92,6 +95,7 @@ table td {
   cursor: pointer;
   padding: 1px 5px;
 }
+
 .day {
   font-size: 24px;
   letter-spacing: 1.5px;
@@ -100,6 +104,7 @@ table td {
   text-align: center;
   vertical-align: top;
 }
+
 .actualDay {
   color: rgba(156, 202, 235, 1);
   font-weight: bold;
@@ -118,6 +123,7 @@ table td {
   border-radius: 5px;
   padding: 0.5em;
 }
+
 .event :nth-child(even) {
   background-color: rgba(84, 232, 222, 0.6);
   border-radius: 5px;

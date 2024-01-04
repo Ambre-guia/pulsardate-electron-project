@@ -252,81 +252,6 @@ export function showUpdateEvent(eventId) {
         console.error(err);
     }
 }
-// Variable pour suivre l'état du formulaire
-let isFormOpen = false;
-let currentUpdateEventModal; // Garder une référence à la fenêtre modale pour la fermeture
-export function showEvent(event) {
-    const showEventContainer = document.createElement("div");
-    showEventContainer.classList.add("show-event-container");
-    // Affiche l'événement de base
-    const basicEventInfo = document.createElement("div");
-    basicEventInfo.innerHTML = `
-    <h2>${event.titre}</h2>
-    <p>Location: ${event.location}</p>
-    <p>Date de début: ${formatDate(event.date_deb)}</p>
-    <p>Date de fin: ${formatDate(event.date_fin)}</p>
-    <p>Catégorie: ${event.categorie}</p>
-    <p>Statut: ${event.statut}</p>
-    <p>Transparence: ${event.transparence}</p>
-    <p>Description: ${event.description}</p>
-  `;
-    showEventContainer.appendChild(basicEventInfo);
-    // Ajoute un bouton pour ouvrir/fermer le formulaire de modification
-    const editButton = document.createElement("button");
-    editButton.classList.add("btn");
-    editButton.classList.add("btn-1");
-    editButton.classList.add("btn-rad");
-    editButton.textContent = isFormOpen ? "Annuler" : "Modifier l'événement";
-    editButton.addEventListener("click", () => toggleUpdateEventForm(event));
-    showEventContainer.appendChild(editButton);
-    // Ajoute un bouton pour supprimer l'événement
-    const deleteButton = document.createElement("button");
-    deleteButton.classList.add("btn");
-    deleteButton.classList.add("btn-2");
-    deleteButton.classList.add("btn-rad");
-    deleteButton.textContent = "Supprimer l'événement";
-    deleteButton.addEventListener("click", () => {
-        window.electron.deleteEvent(event.id);
-        window.electron.reloadWindow();
-        window.electron.closeUpdateWindow();
-    });
-    showEventContainer.appendChild(deleteButton);
-    // Ajoute un bouton pour générer un fichier ICS
-    const generateICSButton = document.createElement("button");
-    generateICSButton.textContent = "Générer ICS";
-    generateICSButton.classList.add("btn");
-    generateICSButton.classList.add("btn-download");
-    generateICSButton.addEventListener("click", () => {
-        const icsContent = generateICS(event);
-        // Générez un nom de fichier unique 
-        const fileName = `event_${event.id}.ics`;
-        // Crée un objet Blob avec le contenu ICS et le type MIME approprié
-        const blob = new Blob([icsContent], { type: "text/calendar" });
-        // Crée un objet URL à partir du Blob
-        const url = URL.createObjectURL(blob);
-        // Crée un lien pour télécharger le fichier
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = fileName;
-        // Ajoute le lien à la page et déclenche le clic pour démarrer le téléchargement
-        document.body.appendChild(link);
-        link.click();
-        // Nettoie l'URL de l'objet Blob après le téléchargement
-        URL.revokeObjectURL(url);
-        // Supprime le lien du corps de la page
-        document.body.removeChild(link);
-    });
-    showEventContainer.appendChild(generateICSButton);
-    // Ajoute un bouton pour fermer la fenêtre
-    const closeButton = document.createElement("button");
-    closeButton.classList.add("btn");
-    closeButton.classList.add("btn-3");
-    closeButton.textContent = "Fermer la fenêtre";
-    closeButton.addEventListener("click", () => window.electron.closeUpdateWindow());
-    showEventContainer.appendChild(closeButton);
-    // Ajoute le conteneur à la page principale
-    document.body.appendChild(showEventContainer);
-}
 export function updateEventForm(event) {
     const updateEventModal = document.createElement("div");
     updateEventModal.classList.add("update-event-modal");
@@ -420,21 +345,9 @@ export function updateEventForm(event) {
     });
     return updateEventModal;
 }
-function toggleUpdateEventForm(event) {
-    if (!isFormOpen) {
-        currentUpdateEventModal = updateEventForm(event);
-        isFormOpen = true;
-    }
-    else {
-        closeUpdateEventForm(currentUpdateEventModal);
-        isFormOpen = false;
-    }
-    const editButton = document.querySelector(".show-event-container button");
-    if (editButton) {
-        editButton.textContent = isFormOpen ? "Annuler" : "Modifier l'événement";
-    }
-}
-function closeUpdateEventForm(updateEventModal) {
+// Variable pour suivre l'état du formulaire
+let isFormOpen = false;
+export function closeUpdateEventForm(updateEventModal) {
     // Supprime la fenêtre modale de modification de la page
     if (updateEventModal) {
         document.body.removeChild(updateEventModal);
@@ -443,7 +356,7 @@ function closeUpdateEventForm(updateEventModal) {
     isFormOpen = false;
 }
 // Mettez à jour la fonction formatDate :
-function formatDate(date) {
+export function formatDate(date) {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
@@ -470,7 +383,7 @@ export function generateICS(event) {
     const icsContent = lignesICS.join('\r\n');
     return icsContent;
 }
-function formatDateForICS(date) {
+export function formatDateForICS(date) {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
@@ -478,96 +391,4 @@ function formatDateForICS(date) {
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const seconds = date.getSeconds().toString().padStart(2, '0');
     return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
-}
-export function showImport(event) {
-    const importModal = document.createElement("div");
-    importModal.classList.add("import-modal");
-    const importForm = document.createElement("form");
-    importForm.innerHTML = `
-    <div class="event-card">
-      <div class="event-card-element">
-        <label for="event-titre">Titre:</label>
-        <input type="text" id="event-titre" name="event-titre" value="${event.titre}" required>
-      </div>
-      <div class="event-card-element">
-        <label for="event-location">Location:</label>
-        <input type="text" id="event-location" name="event-location" value="${event.location}" required>
-      </div>
-    </div>
-    <div class="event-card">
-      <div class="event-card-element">
-        <label for="event-date-deb">Date de début:</label>
-        <input type="datetime-local" id="event-date-deb" name="event-date-deb" value="${formatDate(event.date_deb)}" required>
-      </div>
-      <div class="event-card-element">
-        <label for="event-date-fin">Date de fin:</label>
-        <input type="datetime-local" id="event-date-fin" name="event-date-fin" value="${formatDate(event.date_fin)}" required>
-      </div>
-    </div>
-
-    <div class="event-card">
-      <label for="event-categorie">Catégorie:</label>
-      <input type="text" id="event-categorie" name="event-categorie" value="${event.categorie}" required>
-    </div>
-
-    <div class="event-card">
-      <label for="event-statut">Statut:</label>
-      <select id="event-statut" name="event-statut" required>
-        <option value="TENTATIVE" ${event.statut === "TENTATIVE" ? "selected" : ""}>Tentative</option>
-        <option value="CONFIRMED" ${event.statut === "CONFIRMED" ? "selected" : ""}>Confirmé</option>
-        <option value="CANCELED" ${event.statut === "CANCELED" ? "selected" : ""}>Annulé</option>
-      </select>
-    </div>
-    
-    <div class="event-card">
-      <label for="event-transparence">Transparence:</label>
-      <select id="event-transparence" name="event-transparence" required>
-        <option value="OPAQUE" ${event.transparence === "OPAQUE" ? "selected" : ""}>Opaque</option>
-        <option value="TRANSPARENT" ${event.transparence === "TRANSPARENT" ? "selected" : ""}>Transparent</option>
-      </select>
-    </div>
-
-    <div class="event-card">
-      <textarea id="event-description" placeholder="Description" name="event-description" required>${event.description}</textarea>
-    </div>
-
-    <button class="btn btn-1 btn-rad" type="submit">Appliquer la modification</button>
-
-    <button class="btn btn-2 btn-rad" type="button" id="cancel-import">Annuler l'import</button>
-  `;
-    // Add the form to the import modal
-    importModal.appendChild(importForm);
-    // Add the import modal to the main page
-    document.body.appendChild(importModal);
-    let nbMajUp;
-    nbMajUp = event.nbMaj + 1;
-    // Gestionnaire d'événement pour le bouton Annuler l'import
-    const cancelButton = importForm.querySelector("#cancel-import");
-    cancelButton?.addEventListener("click", () => {
-        window.electron.closeImportWindow();
-    });
-    importForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const importEvent = {
-            titre: importForm.querySelector("#event-titre").value,
-            location: importForm.querySelector("#event-location").value,
-            date_deb: new Date(importForm.querySelector("#event-date-deb").value),
-            date_fin: new Date(importForm.querySelector("#event-date-fin").value),
-            categorie: importForm.querySelector("#event-categorie").value,
-            statut: importForm.querySelector("#event-statut").value,
-            transparence: importForm.querySelector("#event-transparence").value,
-            description: importForm.querySelector("#event-description").value,
-            nbMaj: nbMajUp,
-        };
-        try {
-            // Update the event using the new values
-            await window.electron.createEvent(importEvent);
-            await window.electron.reloadWindow();
-            await window.electron.closeImportWindow();
-        }
-        catch (error) {
-            console.error("Erreur lors de la mise à jour de l'événement :", error);
-        }
-    });
-    return importModal;
 }

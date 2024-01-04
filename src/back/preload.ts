@@ -1,9 +1,5 @@
-// All of the Node.js APIs are available in the preload process.
-// It has the same sandbox as a Chrome extension.
-
 import { IEvent } from "../interfaces/event";
 
-// Preload (Isolated World)
 const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("electron", {
   getAll: async () => {

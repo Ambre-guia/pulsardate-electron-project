@@ -1,8 +1,5 @@
 "use strict";
-// All of the Node.js APIs are available in the preload process.
-// It has the same sandbox as a Chrome extension.
 Object.defineProperty(exports, "__esModule", { value: true });
-// Preload (Isolated World)
 const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("electron", {
     getAll: async () => {

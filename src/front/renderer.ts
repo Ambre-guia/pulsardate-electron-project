@@ -1,4 +1,7 @@
-import { showCreateEvent, showCalendar, showEvent, showImport } from "./utils/utils.js";
+import { showCreateEvent } from "./utils/event/createEvent.js";
+import { showImport } from "./utils/import/showImport.js";
+import { showCalendar } from "./utils/calendar/showCalendar.js";
+import { showEvent } from "./utils/event/showEvent.js";
 
 // Declare the refresh function outside the if block
 const refreshCalendar = async (container: HTMLElement, month: number, year: number) => {
@@ -18,27 +21,27 @@ const refreshCalendar = async (container: HTMLElement, month: number, year: numb
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
 
-    // container dans index.html
+    // container in index.html
     if (calendarContainer) {
       await showCalendar(calendarContainer, currentMonth, currentYear, refreshCalendar);
     }
 
-     // container dans event.html
+    // container in event.html
     if (eventContainer) {
       showCreateEvent(eventContainer, currentMonth, currentYear);
     }
 
-     // container dans update-event.html
+    // container in update-event.html
     if (eventUpdateContainer) {
       window.electron.onUpdateEvent((e: any, event: any) => {
-        showEvent(event)
+        showEvent(event);
       });
     }
 
-     // container dans import.html
+    // container in import.html
     if (importContainer) {
       window.electron.onUpdateImport((e: any, event: any) => {
-        showImport(event)
+        showImport(event);
       });
     }
   } catch (err) {
