@@ -67,6 +67,16 @@ electron_1.ipcMain.handle("open-update-event-window", (event, eventId) => {
         return false;
     }
 });
+electron_1.ipcMain.handle("open-import-window", (event, events) => {
+    try {
+        createImportWindow(events);
+        return true;
+    }
+    catch (error) {
+        console.error("Error opening update event window:", error);
+        return false;
+    }
+});
 function createWindow() {
     // Create the browser window.
     const mainWindow = new electron_1.BrowserWindow({
@@ -137,6 +147,28 @@ function createUpdateWindowEvent(eventId) {
     });
     return updateEventWindow;
 }
+function createImportWindow(event) {
+    // Create the event window.
+    const importWindow = new electron_1.BrowserWindow({
+        height: 800,
+        width: 1000,
+        webPreferences: {
+            preload: path.join(__dirname, "./preload.js"),
+        },
+    });
+    // Load the event.html file.
+    importWindow.loadFile(path.join(__dirname, "../../import.html"));
+    // Open the DevTools (optional).
+    importWindow.webContents.openDevTools();
+    setTimeout(() => {
+        importWindow.webContents.send("import-window", event);
+    }, 200);
+    // Gère le message pour fermer la fenêtre de l'événement
+    electron_1.ipcMain.on('close-import-window', () => {
+        importWindow.destroy();
+    });
+    return importWindow;
+}
 function showImportDialog() {
     const { dialog } = require('electron');
     dialog.showOpenDialog({
@@ -162,7 +194,7 @@ async function handleImportedICS(filePath) {
         const comp = new ICAL.Component(jcalData);
         const importedEvent = extractEventFromComponent(comp);
         console.log('Imported Event:', importedEvent);
-        await (0, event_js_1.createEvent)(importedEvent);
+        await createImportWindow(importedEvent);
     }
     catch (error) {
         console.error("Error handling imported ICS file:", error);

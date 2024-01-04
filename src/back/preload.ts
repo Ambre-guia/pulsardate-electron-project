@@ -14,10 +14,16 @@ contextBridge.exposeInMainWorld("electron", {
       throw error;
     }
   },
-  onUpdateEvent: (cb: (e: any, event: any) => void) =>{    
-    ipcRenderer.on("event-update-event-window",(e:any, event:any) =>{
+  onUpdateEvent: (cb: (e: any, event: any) => void) => {
+    ipcRenderer.on("event-update-event-window", (e: any, event: any) => {
       cb(e, event)
-    })},
+    })
+  },
+  onUpdateImport: (cb: (e: any, event: any) => void) => {
+    ipcRenderer.on("import-window", (e: any, event: any) => {
+      cb(e, event)
+    })
+  },
   getCurrentMonth: async () => {
     try {
       return await ipcRenderer.invoke("get-current-month");
@@ -105,6 +111,14 @@ contextBridge.exposeInMainWorld("electron", {
       throw error;
     }
   },
+  closeImportWindow: () => {
+    try {
+      ipcRenderer.send("close-import-window");
+    } catch (error) {
+      console.error("Error invoking close-event-window:", error);
+      throw error;
+    }
+  },
   reloadWindow: () => {
     try {
       ipcRenderer.send("reload-window");
@@ -113,10 +127,10 @@ contextBridge.exposeInMainWorld("electron", {
       throw err;
     }
   },
-  reloadUpdateWindow: (eventId:number) => {
-    try{
+  reloadUpdateWindow: (eventId: number) => {
+    try {
       ipcRenderer.send("reload-update-event-window", eventId);
-    } catch(err){
+    } catch (err) {
       console.error("Error send reload-update-event-window", err);
       throw err;
     }
@@ -124,6 +138,15 @@ contextBridge.exposeInMainWorld("electron", {
   createUpdateWindowEvent: async (eventId: number) => {
     try {
       ipcRenderer.invoke("open-update-event-window", eventId);
+      return true;
+    } catch (error) {
+      console.error("Error invoking open-update-event-window", error);
+      throw error;
+    }
+  },
+  createImportWindow: async (event: IEvent) => {
+    try {
+      ipcRenderer.invoke("open-import-window", event);
       return true;
     } catch (error) {
       console.error("Error invoking open-update-event-window", error);

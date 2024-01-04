@@ -490,3 +490,88 @@ function formatDateForICS(date) {
     const seconds = date.getSeconds().toString().padStart(2, '0');
     return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
 }
+export function showImport(event) {
+    const importModal = document.createElement("div");
+    importModal.classList.add("import-modal");
+    const importForm = document.createElement("form");
+    importForm.innerHTML = `
+    <div class="event-card">
+      <div class="event-card-element">
+        <label for="event-titre">Titre:</label>
+        <input type="text" id="event-titre" name="event-titre" value="${event.titre}" required>
+      </div>
+      <div class="event-card-element">
+        <label for="event-location">Location:</label>
+        <input type="text" id="event-location" name="event-location" value="${event.location}" required>
+      </div>
+    </div>
+    <div class="event-card">
+      <div class="event-card-element">
+        <label for="event-date-deb">Date de début:</label>
+        <input type="datetime-local" id="event-date-deb" name="event-date-deb" value="${formatDate(event.date_deb)}" required>
+      </div>
+      <div class="event-card-element">
+        <label for="event-date-fin">Date de fin:</label>
+        <input type="datetime-local" id="event-date-fin" name="event-date-fin" value="${formatDate(event.date_fin)}" required>
+      </div>
+    </div>
+
+    <div class="event-card">
+      <label for="event-categorie">Catégorie:</label>
+      <input type="text" id="event-categorie" name="event-categorie" value="${event.categorie}" required>
+    </div>
+
+    <div class="event-card">
+      <label for="event-statut">Statut:</label>
+      <select id="event-statut" name="event-statut" required>
+        <option value="TENTATIVE" ${event.statut === "TENTATIVE" ? "selected" : ""}>Tentative</option>
+        <option value="CONFIRMED" ${event.statut === "CONFIRMED" ? "selected" : ""}>Confirmé</option>
+        <option value="CANCELED" ${event.statut === "CANCELED" ? "selected" : ""}>Annulé</option>
+      </select>
+    </div>
+    
+    <div class="event-card">
+      <label for="event-transparence">Transparence:</label>
+      <select id="event-transparence" name="event-transparence" required>
+        <option value="OPAQUE" ${event.transparence === "OPAQUE" ? "selected" : ""}>Opaque</option>
+        <option value="TRANSPARENT" ${event.transparence === "TRANSPARENT" ? "selected" : ""}>Transparent</option>
+      </select>
+    </div>
+
+    <div class="event-card">
+      <textarea id="event-description" placeholder="Description" name="event-description" required>${event.description}</textarea>
+    </div>
+
+    <button class="btn btn-1 btn-rad" type="submit">Appliquer la modification</button>
+  `;
+    // Add the form to the import modal
+    importModal.appendChild(importForm);
+    // Add the import modal to the main page
+    document.body.appendChild(importModal);
+    let nbMajUp;
+    nbMajUp = event.nbMaj + 1;
+    importForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const importEvent = {
+            titre: importForm.querySelector("#event-titre").value,
+            location: importForm.querySelector("#event-location").value,
+            date_deb: new Date(importForm.querySelector("#event-date-deb").value),
+            date_fin: new Date(importForm.querySelector("#event-date-fin").value),
+            categorie: importForm.querySelector("#event-categorie").value,
+            statut: importForm.querySelector("#event-statut").value,
+            transparence: importForm.querySelector("#event-transparence").value,
+            description: importForm.querySelector("#event-description").value,
+            nbMaj: nbMajUp,
+        };
+        try {
+            // Update the event using the new values
+            await window.electron.createEvent(importEvent);
+            await window.electron.reloadWindow();
+            await window.electron.closeImportWindow();
+        }
+        catch (error) {
+            console.error("Erreur lors de la mise à jour de l'événement :", error);
+        }
+    });
+    return importModal;
+}

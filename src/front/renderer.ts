@@ -4,7 +4,7 @@
 // nodeIntegration is set to true in webPreferences.
 // Use preload.js to selectively enable features
 // needed in the renderer process.
-import { showCreateEvent, showCalendar, showEvent } from "./utils/utils.js";
+import { showCreateEvent, showCalendar, showEvent, showImport } from "./utils/utils.js";
 
 // Import the function closeWindow from the preload script
 const closeWindow = window.electron.closeWindow;
@@ -22,6 +22,7 @@ const refreshCalendar = async (container: HTMLElement, month: number, year: numb
     const calendarContainer = document.getElementById("tableCalendar");
     const eventContainer = document.getElementById("eventContainer");
     const eventUpdateContainer = document.getElementById("eventUpdateContainer");
+    const importContainer = document.getElementById("importContainer");
 
     // Get the current month and year outside the if block
     const currentDate = new Date();
@@ -38,10 +39,16 @@ const refreshCalendar = async (container: HTMLElement, month: number, year: numb
       await showCreateEvent(eventContainer, currentMonth, currentYear, () => refreshCalendar(calendarContainer, currentMonth, currentYear), closeWindow, reloadWindow);
     }
 
-    if(eventUpdateContainer){
-      window.electron.onUpdateEvent((e:any, event:any) => {
-      showEvent(event)
-});
+    if (eventUpdateContainer) {
+      window.electron.onUpdateEvent((e: any, event: any) => {
+        showEvent(event)
+      });
+    }
+
+    if (importContainer) {
+      window.electron.onUpdateImport((e: any, event: any) => {
+        showImport(event)
+      });
     }
   } catch (err) {
     console.error(err);

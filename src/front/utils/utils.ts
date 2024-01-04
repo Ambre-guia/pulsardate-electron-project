@@ -379,8 +379,6 @@ export function showEvent(event: IEvent) {
   `;
   showEventContainer.appendChild(basicEventInfo);
 
-   
-
   // Ajoute un bouton pour ouvrir/fermer le formulaire de modification
   const editButton = document.createElement("button");
   editButton.classList.add("btn");
@@ -634,7 +632,6 @@ export function generateICS(event: IEvent) {
   return icsContent;
 }
 
-
 function formatDateForICS(date: Date) {
   const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -644,4 +641,122 @@ function formatDateForICS(date: Date) {
   const seconds = date.getSeconds().toString().padStart(2, '0');
 
   return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
+}
+
+export function showImport(event: IEvent) {
+  const importModal = document.createElement("div");
+  importModal.classList.add("import-modal");
+
+  const importForm = document.createElement("form");
+  importForm.innerHTML = `
+    <div class="event-card">
+      <div class="event-card-element">
+        <label for="event-titre">Titre:</label>
+        <input type="text" id="event-titre" name="event-titre" value="${
+          event.titre
+        }" required>
+      </div>
+      <div class="event-card-element">
+        <label for="event-location">Location:</label>
+        <input type="text" id="event-location" name="event-location" value="${
+          event.location
+        }" required>
+      </div>
+    </div>
+    <div class="event-card">
+      <div class="event-card-element">
+        <label for="event-date-deb">Date de début:</label>
+        <input type="datetime-local" id="event-date-deb" name="event-date-deb" value="${formatDate(
+          event.date_deb
+        )}" required>
+      </div>
+      <div class="event-card-element">
+        <label for="event-date-fin">Date de fin:</label>
+        <input type="datetime-local" id="event-date-fin" name="event-date-fin" value="${formatDate(
+          event.date_fin
+        )}" required>
+      </div>
+    </div>
+
+    <div class="event-card">
+      <label for="event-categorie">Catégorie:</label>
+      <input type="text" id="event-categorie" name="event-categorie" value="${
+        event.categorie
+      }" required>
+    </div>
+
+    <div class="event-card">
+      <label for="event-statut">Statut:</label>
+      <select id="event-statut" name="event-statut" required>
+        <option value="TENTATIVE" ${
+          event.statut === "TENTATIVE" ? "selected" : ""
+        }>Tentative</option>
+        <option value="CONFIRMED" ${
+          event.statut === "CONFIRMED" ? "selected" : ""
+        }>Confirmé</option>
+        <option value="CANCELED" ${
+          event.statut === "CANCELED" ? "selected" : ""
+        }>Annulé</option>
+      </select>
+    </div>
+    
+    <div class="event-card">
+      <label for="event-transparence">Transparence:</label>
+      <select id="event-transparence" name="event-transparence" required>
+        <option value="OPAQUE" ${
+          event.transparence === "OPAQUE" ? "selected" : ""
+        }>Opaque</option>
+        <option value="TRANSPARENT" ${
+          event.transparence === "TRANSPARENT" ? "selected" : ""
+        }>Transparent</option>
+      </select>
+    </div>
+
+    <div class="event-card">
+      <textarea id="event-description" placeholder="Description" name="event-description" required>${
+        event.description
+      }</textarea>
+    </div>
+
+    <button class="btn btn-1 btn-rad" type="submit">Appliquer la modification</button>
+  `;
+
+  // Add the form to the import modal
+  importModal.appendChild(importForm);
+
+  // Add the import modal to the main page
+  document.body.appendChild(importModal);
+
+  let nbMajUp: number;
+  nbMajUp = event.nbMaj + 1;
+
+  importForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const importEvent: IEvent = {
+      titre: (importForm.querySelector("#event-titre") as HTMLInputElement).value,
+      location: (importForm.querySelector("#event-location") as HTMLInputElement).value,
+      date_deb: new Date((importForm.querySelector("#event-date-deb") as HTMLInputElement).value),
+      date_fin: new Date((importForm.querySelector("#event-date-fin") as HTMLInputElement).value),
+      categorie: (importForm.querySelector("#event-categorie") as HTMLInputElement).value,
+      statut: (importForm.querySelector("#event-statut") as HTMLSelectElement).value,
+      transparence: (importForm.querySelector("#event-transparence") as HTMLSelectElement).value,
+      description: (importForm.querySelector("#event-description") as HTMLTextAreaElement).value,
+      nbMaj: nbMajUp,
+    }
+
+    try {
+      // Update the event using the new values
+      await window.electron.createEvent(importEvent);
+
+      await window.electron.reloadWindow();
+
+      await window.electron.closeImportWindow();
+
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour de l'événement :", error);
+    }
+  });
+
+  return importModal;
 }
