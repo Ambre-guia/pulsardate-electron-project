@@ -36,3 +36,31 @@ select {
   width: 100%;
   resize: vertical;
 }
+
+.btn {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 1em 2em;
+  letter-spacing: 1px;
+  transition: transform 80ms ease-in;
+}
+.btn-rad {
+  border-radius: 20px;
+}
+.btn-1 {
+  border: 1px solid #ff4b2b;
+  background-color: #ff4b2b;
+  margin-bottom: 2em;
+}
+.btn-2 {
+  border: 1px solid lightgrey;
+  color: lightgrey;
+  margin: 0 2em;
+  background-color: transparent;
+}
+.btn-3 {
+  color: lightgray;
+  background-color: transparent;
+  border: none;
+}

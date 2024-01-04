@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.handleImportedICS = void 0;
 const electron_1 = require("electron");
 const path = require("path");
 const event_js_1 = require("./bdd/event.js");
 const date_js_1 = require("./inc/date.js");
+const ICAL = require("ical.js");
 // Handle to get all events
 electron_1.ipcMain.handle("get-events", async (event) => await (0, event_js_1.getAll)());
 // Handle to create a new event
@@ -57,7 +59,6 @@ electron_1.ipcMain.handle("get-last-day-of-month", async (event, month, year) =>
 electron_1.ipcMain.handle("open-event-window", () => createWindowEvent());
 electron_1.ipcMain.handle("open-update-event-window", (event, eventId) => {
     try {
-        console.log("asrzae", eventId);
         createUpdateWindowEvent(eventId);
         return true;
     }
@@ -136,6 +137,65 @@ function createUpdateWindowEvent(eventId) {
     });
     return updateEventWindow;
 }
+function showImportDialog() {
+    const { dialog } = require('electron');
+    dialog.showOpenDialog({
+        properties: ['openFile'],
+        filters: [
+            { name: 'ICS Files', extensions: ['ics'] },
+            { name: 'All Files', extensions: ['*'] },
+        ],
+    }).then((result) => {
+        if (!result.canceled && result.filePaths.length > 0) {
+            const filePath = result.filePaths[0];
+            handleImportedICS(filePath);
+        }
+    }).catch((err) => {
+        console.error('Error in showImportDialog:', err);
+    });
+}
+async function handleImportedICS(filePath) {
+    const fs = require("fs").promises;
+    try {
+        const icsContent = await fs.readFile(filePath, "utf-8");
+        const jcalData = ICAL.parse(icsContent);
+        const comp = new ICAL.Component(jcalData);
+        const importedEvent = extractEventFromComponent(comp);
+        console.log('Imported Event:', importedEvent);
+        await (0, event_js_1.createEvent)(importedEvent);
+    }
+    catch (error) {
+        console.error("Error handling imported ICS file:", error);
+        throw error;
+    }
+}
+exports.handleImportedICS = handleImportedICS;
+function extractEventFromComponent(component) {
+    const jCal = component.jCal;
+    if (!jCal || jCal.length < 3) {
+        console.error("Invalid jCal structure in the component");
+        return null;
+    }
+    const vcalendar = jCal[2];
+    const vevent = vcalendar.find((item) => item[0] === "vevent");
+    if (!vevent) {
+        console.error("Invalid vevent structure in the vcalendar component");
+        return null;
+    }
+    const event = {
+        id: vevent[1].find((item) => item[0] === "uid")?.[3] || "",
+        date_deb: new Date(vevent[1].find((item) => item[0] === "dtstart")?.[3] || ""),
+        date_fin: new Date(vevent[1].find((item) => item[0] === "dtend")?.[3] || ""),
+        titre: vevent[1].find((item) => item[0] === "summary")?.[3] || "",
+        location: vevent[1].find((item) => item[0] === "location")?.[3] || "",
+        categorie: vevent[1].find((item) => item[0] === "categories")?.[3] || "",
+        statut: vevent[1].find((item) => item[0] === "status")?.[3] || "",
+        description: vevent[1].find((item) => item[0] === "description")?.[3] || "",
+        transparence: vevent[1].find((item) => item[0] === "transp")?.[3] || "",
+        nbMaj: 1,
+    };
+    return event;
+}
 // Générer un menu pour l'application
 const menuTemplate = [
     {
@@ -145,6 +205,17 @@ const menuTemplate = [
                 label: "Creer un event",
                 click: () => {
                     createWindowEvent();
+                },
+            },
+        ],
+    },
+    {
+        label: "File",
+        submenu: [
+            {
+                label: "Import ICS",
+                click: () => {
+                    showImportDialog();
                 },
             },
         ],

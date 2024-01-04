@@ -13,7 +13,8 @@ import {
   getFirstDayOfMonth,
   getLastDayOfMonth,
 } from "./inc/date.js";
-
+import { IEvent } from "../interfaces/event.js";
+const ICAL = require("ical.js");
 // Handle to get all events
 ipcMain.handle("get-events", async (event) => await getAll());
 
@@ -76,9 +77,7 @@ ipcMain.handle("get-last-day-of-month", async (event, month, year) =>
 ipcMain.handle("open-event-window", () => createWindowEvent());
 
 ipcMain.handle("open-update-event-window", (event, eventId) => {
-  try {
-    console.log("asrzae", eventId);
-    
+  try {   
     createUpdateWindowEvent(eventId);
     return true;
   } catch (error) {
@@ -172,6 +171,78 @@ function createUpdateWindowEvent(eventId: number) {
   return updateEventWindow;
 }
 
+function showImportDialog() {
+  const { dialog } = require('electron');
+
+  dialog.showOpenDialog({
+    properties: ['openFile'],
+    filters: [
+      { name: 'ICS Files', extensions: ['ics'] },
+      { name: 'All Files', extensions: ['*'] },
+    ],
+  }).then((result) => {
+    if (!result.canceled && result.filePaths.length > 0) {
+      const filePath = result.filePaths[0];
+      
+      handleImportedICS(filePath);
+    }
+  }).catch((err) => {
+    console.error('Error in showImportDialog:', err);
+  });
+}
+export async function handleImportedICS(filePath: string) {
+  const fs = require("fs").promises;
+
+  try {
+    const icsContent = await fs.readFile(filePath, "utf-8");
+
+    const jcalData = ICAL.parse(icsContent);
+    const comp = new ICAL.Component(jcalData);
+
+    const importedEvent = extractEventFromComponent(comp);
+    console.log('Imported Event:', importedEvent);
+
+    await createEvent(importedEvent); 
+
+  } catch (error) {
+    console.error("Error handling imported ICS file:", error);
+    throw error;
+  }
+}
+
+function extractEventFromComponent(component: any): IEvent | null {
+  const jCal = component.jCal;
+
+  if (!jCal || jCal.length < 3) {
+    console.error("Invalid jCal structure in the component");
+    return null;
+  }
+
+  const vcalendar = jCal[2];
+  
+  const vevent = vcalendar.find((item: any) => item[0] === "vevent");
+
+  if (!vevent) {
+    console.error("Invalid vevent structure in the vcalendar component");
+    return null;
+  }
+
+  const event: IEvent = {
+    id: vevent[1].find((item: any) => item[0] === "uid")?.[3] || "",
+    date_deb: new Date(vevent[1].find((item: any) => item[0] === "dtstart")?.[3] || ""),
+    date_fin: new Date(vevent[1].find((item: any) => item[0] === "dtend")?.[3] || ""),
+    titre: vevent[1].find((item: any) => item[0] === "summary")?.[3] || "",
+    location: vevent[1].find((item: any) => item[0] === "location")?.[3] || "",
+    categorie: vevent[1].find((item: any) => item[0] === "categories")?.[3] || "",
+    statut: vevent[1].find((item: any) => item[0] === "status")?.[3] || "",
+    description: vevent[1].find((item: any) => item[0] === "description")?.[3] || "",
+    transparence: vevent[1].find((item: any) => item[0] === "transp")?.[3] || "",
+    nbMaj: 1,
+  };
+
+  return event;
+}
+
 // Générer un menu pour l'application
 const menuTemplate = [
   {
@@ -181,6 +252,17 @@ const menuTemplate = [
         label: "Creer un event",
         click: () => {
           createWindowEvent();
+        },
+      },
+    ],
+  },
+  {
+    label: "File",
+    submenu: [
+      {
+        label: "Import ICS",
+        click: () => {
+          showImportDialog();
         },
       },
     ],

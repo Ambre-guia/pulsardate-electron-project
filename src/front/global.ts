@@ -19,6 +19,7 @@ declare global {
       createUpdateWindowEvent:(eventId: number) => Promise<any>;
       onUpdateEvent: (cb: any) => void;
       updateEvent:(eventId: number, updatedEvent: IEvent)=> Promise<any>;
+      generateICS:(event: IEvent) => Promise<any>;
     };
   }
 }
