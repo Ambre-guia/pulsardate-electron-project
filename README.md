@@ -37,7 +37,16 @@ Pour commencer avec l'application, suivez ces étapes :
     npm install 
     ```
 
-4. Exécutez l'application
+4. Modifiez le fichier src/back/bdd/log.ts:
+
+    ```bash 
+    host: XXXX,
+    user: XXXX,
+    port: XXXX,
+    database: XXXX, 
+    ```
+
+5. Exécutez l'application
 
     ```bash
     npm start
