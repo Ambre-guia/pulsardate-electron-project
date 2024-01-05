@@ -96,6 +96,40 @@ export function showCreateEvent(
       return;
     }
 
+    // Check for empty required fields
+    if (
+      !eventTitre ||
+      !eventLocation ||
+      !eventCategorie ||
+      !eventStatut ||
+      !eventTransparence ||
+      !eventDescription
+    ) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    // Check for valid dates
+    if (isNaN(new Date(eventDateDeb).getTime()) || isNaN(new Date(eventDateFin).getTime())) {
+      alert("Invalid date format.");
+      return;
+    }
+
+    // Check for valid values of certain fields
+    const allowedStatuts = ["TENTATIVE", "CONFIRMED", "CANCELED"];
+    
+    if (!allowedStatuts.includes(eventStatut)) {
+      alert("Invalid value for status.");
+      return;
+    }
+    
+    const allowedTransparences = ["OPAQUE", "TRANSPARENT"];
+
+    if (!allowedTransparences.includes(eventTransparence)) {
+      alert("Invalid value for transparency.");
+      return;
+    }
+
     // Set nbMaj to 1
     const eventNbMaj = 1;
 
@@ -119,6 +153,7 @@ export function showCreateEvent(
       window.electron.reloadWindow();
     } catch (error) {
       console.error("Error creating the event:", error);
+      alert("Error creating the event. Please try again.");
     }
   });
 

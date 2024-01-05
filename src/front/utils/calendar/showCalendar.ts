@@ -171,10 +171,8 @@ export async function showCalendar(
             refreshCalendarCallback(container, targetMonth, targetYear);
         }
     } catch (error) {
-        console.error(
-            "Error retrieving calendar data:",
-            error
-        );
+        console.error("Error retrieving calendar data:", error);
+        alert("An error occurred while retrieving calendar data. Please try again.");
     }
 }
 
@@ -183,6 +181,7 @@ export function showUpdateEvent(eventId: number) {
         window.electron.createUpdateWindowEvent(eventId);
     } catch (err) {
         console.error(err);
+        alert("An error occurred while showing the update event window. Please try again.");
     }
 }
 

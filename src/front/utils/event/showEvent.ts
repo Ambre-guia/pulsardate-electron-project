@@ -1,12 +1,9 @@
 import { IEvent } from "../../../interfaces/event.js";
 import { formatDate } from "../date/formatDate.js";
 import { generateICS } from "../import/generateICS.js";
-import { updateEventForm } from "../event/updateEvent.js";
-import { closeUpdateEventForm } from "./closeUpdateEventForm.js";
+import { toggleUpdateEventForm } from "./toggleUpdateEventForm.js";
 
-// Variable to track the state of the form
-let isFormOpen = false;
-let currentUpdateEventModal: any;
+let isFormOpen: boolean;
 
 export function showEvent(event: IEvent) {
     const showEventContainer = document.createElement("div");
@@ -32,7 +29,14 @@ export function showEvent(event: IEvent) {
     editButton.classList.add("btn-1");
     editButton.classList.add("btn-rad");
     editButton.textContent = isFormOpen ? "Cancel" : "Edit Event";
-    editButton.addEventListener("click", () => toggleUpdateEventForm(event));
+    editButton.addEventListener("click", () => {
+        try {
+            toggleUpdateEventForm(event);
+        } catch (error) {
+            console.error("Error toggling update form:", error);
+            alert("An error occurred while trying to edit the event. Please try again.");
+        }
+    });
     showEventContainer.appendChild(editButton);
 
     // Add a button to delete the event
@@ -42,9 +46,14 @@ export function showEvent(event: IEvent) {
     deleteButton.classList.add("btn-rad");
     deleteButton.textContent = "Delete Event";
     deleteButton.addEventListener("click", () => {
-        window.electron.deleteEvent(event.id);
-        window.electron.reloadWindow();
-        window.electron.closeUpdateWindow();
+        try {
+            window.electron.deleteEvent(event.id);
+            window.electron.reloadWindow();
+            window.electron.closeUpdateWindow();
+        } catch (error) {
+            console.error("Error deleting event:", error);
+            alert("An error occurred while trying to delete the event. Please try again.");
+        }
     });
     showEventContainer.appendChild(deleteButton);
 
@@ -54,31 +63,36 @@ export function showEvent(event: IEvent) {
     generateICSButton.classList.add("btn");
     generateICSButton.classList.add("btn-download");
     generateICSButton.addEventListener("click", () => {
-        const icsContent = generateICS(event);
+        try {
+            const icsContent = generateICS(event);
 
-        // Generate a unique file name
-        const fileName = `event_${event.id}.ics`;
+            // Generate a unique file name
+            const fileName = `event_${event.id}.ics`;
 
-        // Create a Blob object with the ICS content and the appropriate MIME type
-        const blob = new Blob([icsContent], { type: "text/calendar" });
+            // Create a Blob object with the ICS content and the appropriate MIME type
+            const blob = new Blob([icsContent], { type: "text/calendar" });
 
-        // Create a URL object from the Blob
-        const url = URL.createObjectURL(blob);
+            // Create a URL object from the Blob
+            const url = URL.createObjectURL(blob);
 
-        // Create a link to download the file
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = fileName;
+            // Create a link to download the file
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = fileName;
 
-        // Add the link to the page and trigger the click to start the download
-        document.body.appendChild(link);
-        link.click();
+            // Add the link to the page and trigger the click to start the download
+            document.body.appendChild(link);
+            link.click();
 
-        // Clean up the URL of the Blob object after the download
-        URL.revokeObjectURL(url);
+            // Clean up the URL of the Blob object after the download
+            URL.revokeObjectURL(url);
 
-        // Remove the link from the page
-        document.body.removeChild(link);
+            // Remove the link from the page
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Error generating ICS:", error);
+            alert("An error occurred while trying to generate the ICS file. Please try again.");
+        }
     });
     showEventContainer.appendChild(generateICSButton);
 
@@ -87,24 +101,16 @@ export function showEvent(event: IEvent) {
     closeButton.classList.add("btn");
     closeButton.classList.add("btn-3");
     closeButton.textContent = "Close Window";
-    closeButton.addEventListener("click", () => window.electron.closeUpdateWindow());
+    closeButton.addEventListener("click", () => {
+        try {
+            window.electron.closeUpdateWindow();
+        } catch (error) {
+            console.error("Error closing window:", error);
+            alert("An error occurred while trying to close the window. Please try again.");
+        }
+    });
     showEventContainer.appendChild(closeButton);
 
     // Add the container to the main page
     document.body.appendChild(showEventContainer);
-}
-
-export function toggleUpdateEventForm(event: IEvent) {
-    if (!isFormOpen) {
-        currentUpdateEventModal = updateEventForm(event);
-        isFormOpen = true;
-    } else {
-        closeUpdateEventForm(currentUpdateEventModal);
-        isFormOpen = false;
-    }
-
-    const editButton = document.querySelector(".show-event-container button");
-    if (editButton) {
-        editButton.textContent = isFormOpen ? "Cancel" : "Edit Event";
-    }
 }

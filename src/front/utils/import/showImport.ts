@@ -93,19 +93,70 @@ export function showImport(event: IEvent) {
     event.preventDefault();
 
     // Get values from the form
-    const importEvent: IEvent = {
-      titre: (importForm.querySelector("#event-titre") as HTMLInputElement).value,
-      location: (importForm.querySelector("#event-location") as HTMLInputElement).value,
-      date_deb: new Date((importForm.querySelector("#event-date-deb") as HTMLInputElement).value),
-      date_fin: new Date((importForm.querySelector("#event-date-fin") as HTMLInputElement).value),
-      categorie: (importForm.querySelector("#event-categorie") as HTMLInputElement).value,
-      statut: (importForm.querySelector("#event-statut") as HTMLSelectElement).value,
-      transparence: (importForm.querySelector("#event-transparence") as HTMLSelectElement).value,
-      description: (importForm.querySelector("#event-description") as HTMLTextAreaElement).value,
-      nbMaj: nbMajUp,
+    const eventTitre = (importForm.querySelector("#event-titre") as HTMLInputElement).value;
+    const eventLocation = (importForm.querySelector("#event-location") as HTMLInputElement).value;
+    const eventDateDeb = (importForm.querySelector("#event-date-deb") as HTMLInputElement).value;
+    const eventDateFin = (importForm.querySelector("#event-date-fin") as HTMLInputElement).value;
+    const eventCategorie = (importForm.querySelector("#event-categorie") as HTMLInputElement).value;
+    const eventStatut = (importForm.querySelector("#event-statut") as HTMLSelectElement).value;
+    const eventTransparence = (importForm.querySelector("#event-transparence") as HTMLSelectElement).value;
+    const eventDescription = (importForm.querySelector("#event-description") as HTMLTextAreaElement).value;
+
+    // Check for empty required fields
+    if (
+      !eventTitre ||
+      !eventLocation ||
+      !eventDateDeb ||
+      !eventDateFin ||
+      !eventCategorie ||
+      !eventStatut ||
+      !eventTransparence ||
+      !eventDescription
+    ) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    // Check for valid dates
+    if (isNaN(new Date(eventDateDeb).getTime()) || isNaN(new Date(eventDateFin).getTime())) {
+      alert("Invalid date format.");
+      return;
+    }
+
+    // Check if the end date is after the start date
+    if (new Date(eventDateFin) <= new Date(eventDateDeb)) {
+      alert("End date must be after the start date.");
+      return;
+    }
+
+    // Check for valid values of certain fields
+    const allowedStatuts = ["TENTATIVE", "CONFIRMED", "CANCELED"];
+    
+    if (!allowedStatuts.includes(eventStatut)) {
+      alert("Invalid value for status.");
+      return;
+    }
+    
+    const allowedTransparences = ["OPAQUE", "TRANSPARENT"];
+
+    if (!allowedTransparences.includes(eventTransparence)) {
+      alert("Invalid value for transparency.");
+      return;
     }
 
     try {
+      const importEvent: IEvent = {
+        titre: eventTitre,
+        location: eventLocation,
+        date_deb: new Date(eventDateDeb),
+        date_fin: new Date(eventDateFin),
+        categorie: eventCategorie,
+        statut: eventStatut,
+        transparence: eventTransparence,
+        description: eventDescription,
+        nbMaj: nbMajUp,
+      };
+
       // Create the event using the new values
       await window.electron.createEvent(importEvent);
 
@@ -117,8 +168,9 @@ export function showImport(event: IEvent) {
 
     } catch (error) {
       console.error("Error while updating the event:", error);
+      alert("Error while updating the event. Please try again.");
     }
-  });
+});
 
   return importModal;
 }

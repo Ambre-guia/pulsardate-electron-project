@@ -74,19 +74,71 @@ export function updateEventForm(event: IEvent) {
   updateEventForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const updatedEvent: IEvent = {
-      titre: (updateEventForm.querySelector("#event-titre") as HTMLInputElement).value,
-      location: (updateEventForm.querySelector("#event-location") as HTMLInputElement).value,
-      date_deb: new Date((updateEventForm.querySelector("#event-date-deb") as HTMLInputElement).value),
-      date_fin: new Date((updateEventForm.querySelector("#event-date-fin") as HTMLInputElement).value),
-      categorie: (updateEventForm.querySelector("#event-categorie") as HTMLInputElement).value,
-      statut: (updateEventForm.querySelector("#event-statut") as HTMLSelectElement).value,
-      transparence: (updateEventForm.querySelector("#event-transparence") as HTMLSelectElement).value,
-      description: (updateEventForm.querySelector("#event-description") as HTMLTextAreaElement).value,
-      nbMaj: nbMajUp,
-    };
+    // Get values from the form
+    const eventTitre = (updateEventForm.querySelector("#event-titre") as HTMLInputElement).value;
+    const eventLocation = (updateEventForm.querySelector("#event-location") as HTMLInputElement).value;
+    const eventDateDeb = (updateEventForm.querySelector("#event-date-deb") as HTMLInputElement).value;
+    const eventDateFin = (updateEventForm.querySelector("#event-date-fin") as HTMLInputElement).value;
+    const eventCategorie = (updateEventForm.querySelector("#event-categorie") as HTMLInputElement).value;
+    const eventStatut = (updateEventForm.querySelector("#event-statut") as HTMLSelectElement).value;
+    const eventTransparence = (updateEventForm.querySelector("#event-transparence") as HTMLSelectElement).value;
+    const eventDescription = (updateEventForm.querySelector("#event-description") as HTMLTextAreaElement).value;
+
+    // Check for empty required fields
+    if (
+      !eventTitre ||
+      !eventLocation ||
+      !eventDateDeb ||
+      !eventDateFin ||
+      !eventCategorie ||
+      !eventStatut ||
+      !eventTransparence ||
+      !eventDescription
+    ) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    // Check for valid dates
+    if (isNaN(new Date(eventDateDeb).getTime()) || isNaN(new Date(eventDateFin).getTime())) {
+      alert("Invalid date format.");
+      return;
+    }
+
+    // Check if the end date is after the start date
+    if (new Date(eventDateFin) <= new Date(eventDateDeb)) {
+      alert("End date must be after the start date.");
+      return;
+    }
+
+    // Check for valid values of certain fields
+    const allowedStatuts = ["TENTATIVE", "CONFIRMED", "CANCELED"];
+    
+    if (!allowedStatuts.includes(eventStatut)) {
+      alert("Invalid value for status.");
+      return;
+    }
+
+    const allowedTransparences = ["OPAQUE", "TRANSPARENT"];
+
+    if ( !allowedTransparences.includes(eventTransparence)) {
+        alert("Invalid value for transparency.");
+        return;
+      }
 
     try {
+      const updatedEvent: IEvent = {
+        titre: eventTitre,
+        location: eventLocation,
+        date_deb: new Date(eventDateDeb),
+        date_fin: new Date(eventDateFin),
+        categorie: eventCategorie,
+        statut: eventStatut,
+        transparence: eventTransparence,
+        description: eventDescription,
+        nbMaj: nbMajUp,
+      };
+
       // Update the event using the new values
       await window.electron.updateEvent(eventId, updatedEvent);
 
@@ -97,8 +149,9 @@ export function updateEventForm(event: IEvent) {
       closeUpdateEventForm(updateEventModal);
     } catch (error) {
       console.error("Error updating the event:", error);
+      alert("Error updating the event. Please try again.");
     }
-  });
+});
 
   return updateEventModal;
 }

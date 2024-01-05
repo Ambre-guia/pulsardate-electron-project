@@ -46,6 +46,7 @@ select {
   padding: 1em 2em;
   letter-spacing: 1px;
   transition: transform 800ms ease-out;
+  cursor: pointer;
 }
 
 .btn-rad {
